@@ -53,12 +53,12 @@
     <a id="btnB" class="btn secondary" href="#" onclick="setStatus('Launching Method B...')">Method B (WebView)</a>
     <a id="btnC" class="btn secondary" href="#" onclick="setStatus('Launching Method C...')">Method C (AppLink)</a>
 
-    <div class="small">payload: poc.html</div>
+    <div class="small">payload: v2/poc.html</div>
 
     <script>
         var b = window.location.href.split('?')[0].split('#')[0];
         var base = b.substring(0, b.lastIndexOf('/') + 1);
-        var PAYLOAD = base + "poc.html";
+        var PAYLOAD = base + "v2/poc.html";
 
         // Define schemes
         var A = "otravel://schemedispatcher?action=" + PAYLOAD;
