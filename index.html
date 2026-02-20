@@ -58,7 +58,7 @@
     <script>
         var b = window.location.href.split('?')[0].split('#')[0];
         var base = b.substring(0, b.lastIndexOf('/') + 1);
-        var PAYLOAD = base + "v2/poc.html";
+        var PAYLOAD = base + "v2/poc.html?v=" + new Date().getTime();
 
         // Define schemes
         var A = "otravel://schemedispatcher?action=" + PAYLOAD;
