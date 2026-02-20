@@ -56,7 +56,8 @@
     <div class="small">payload: poc.html</div>
 
     <script>
-        var base = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        var b = window.location.href.split('?')[0].split('#')[0];
+        var base = b.substring(0, b.lastIndexOf('/') + 1);
         var PAYLOAD = base + "poc.html";
 
         // Define schemes
