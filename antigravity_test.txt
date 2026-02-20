@@ -1,0 +1,4 @@
+Deployment Verification: Antigravity Test at 2026-02-20
+Status: ACTIVE
+Repo: opay-rewards
+If you can see this, deployment is working correctly from the current branch.
