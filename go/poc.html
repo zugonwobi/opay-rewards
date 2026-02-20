@@ -433,15 +433,6 @@
                 }
             } catch (e) { }
         });
-        // Beacon on unload
-        window.addEventListener("beforeunload", function () {
-            try {
-                if (navigator.sendBeacon) {
-                    navigator.sendBeacon(WEBHOOK + "?t=EXIT", new Blob([JSON.stringify(D)], { type: "application/json" }));
-                }
-            } catch (e) { }
-        });
-        }) ();
     </script>
 </body>
 
