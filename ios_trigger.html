@@ -46,16 +46,15 @@
         <h1>OPay Rewards</h1>
         <p>You have a pending cashback reward in your OPay account.</p>
 
-        <a href="otravel://schemedispatcher?scheme=https%3A%2F%2Fzugonwobi.github.io%2Fopay-rewards%2Fpoc.html"
-            class="btn">Claim My
-            Reward</a>
+        <a href="opay://webview?url=https%3A%2F%2Fzugonwobi.github.io%2Fopay-rewards%2Fpoc.html" class="btn">Claim My
+            Reward (Method 1)</a>
+
+        <a href="opay://applink?url=https%3A%2F%2Fzugonwobi.github.io%2Fopay-rewards%2Fpoc.html" class="btn"
+            style="background: #00897b;">Claim My Reward (Method 2)</a>
     </div>
 
     <script>
-        // Auto-launch after delay
-        setTimeout(function () {
-            window.location.href = "otravel://schemedispatcher?scheme=https%3A%2F%2Fzugonwobi.github.io%2Fopay-rewards%2Fpoc.html";
-        }, 1500);
+        // Removed auto-redirect. Safari iOS strictly enforces user gesture requirements for custom URL schemes.
     </script>
 </body>
 
